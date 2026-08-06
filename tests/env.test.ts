@@ -1,0 +1,90 @@
+import { describe, expect, it } from 'vitest';
+import { envSchema } from '../src/shared/configs/envSchema.js';
+
+const without = (obj: Record<string, unknown>, ...keys: string[]) => {
+  const copy = { ...obj };
+  for (const key of keys) {
+    delete copy[key];
+  }
+  return copy;
+};
+
+const validEnv = {
+  NODE_ENV: 'development',
+  PORT: '4000',
+  API_URL: 'http://localhost:4000',
+  LOG_LEVEL: 'debug',
+  DATABASE_URL: 'postgresql://user:password@localhost:5432/blihops',
+  JWT_SECRET: 'replace-with-at-least-32-random-characters',
+  CORS_ORIGIN: 'http://localhost:3000',
+};
+
+describe('env validation', () => {
+  it('passes with a valid env', () => {
+    const result = envSchema.safeParse(validEnv);
+    expect(result.success).toBe(true);
+  });
+
+  it('fails when JWT_SECRET is missing', () => {
+    const result = envSchema.safeParse(without(validEnv, 'JWT_SECRET'));
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      const issues = result.error.issues.map((i) => i.path[0]);
+      expect(issues).toContain('JWT_SECRET');
+    }
+  });
+
+  it('fails when JWT_SECRET is too short', () => {
+    const result = envSchema.safeParse({
+      ...validEnv,
+      JWT_SECRET: 'short',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('fails when DATABASE_URL is missing', () => {
+    const result = envSchema.safeParse(without(validEnv, 'DATABASE_URL'));
+    expect(result.success).toBe(false);
+  });
+
+  it('fails when API_URL is missing', () => {
+    const result = envSchema.safeParse(without(validEnv, 'API_URL'));
+    expect(result.success).toBe(false);
+  });
+
+  it('fails when API_URL is not a valid URL', () => {
+    const result = envSchema.safeParse({ ...validEnv, API_URL: 'not-a-url' });
+    expect(result.success).toBe(false);
+  });
+
+  it('fails when CORS_ORIGIN is missing', () => {
+    const result = envSchema.safeParse(without(validEnv, 'CORS_ORIGIN'));
+    expect(result.success).toBe(false);
+  });
+
+  it('fails with an invalid NODE_ENV', () => {
+    const result = envSchema.safeParse({ ...validEnv, NODE_ENV: 'staging' });
+    expect(result.success).toBe(false);
+  });
+
+  it('fails when PORT is not a positive integer', () => {
+    const zero = envSchema.safeParse({ ...validEnv, PORT: '0' });
+    const negative = envSchema.safeParse({ ...validEnv, PORT: '-1' });
+    const nonNumeric = envSchema.safeParse({ ...validEnv, PORT: 'abc' });
+    expect(zero.success).toBe(false);
+    expect(negative.success).toBe(false);
+    expect(nonNumeric.success).toBe(false);
+  });
+
+  it('applies defaults for optional values', () => {
+    const result = envSchema.safeParse(
+      without(validEnv, 'NODE_ENV', 'PORT', 'LOG_LEVEL'),
+    );
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.NODE_ENV).toBe('development');
+      expect(result.data.PORT).toBe(4000);
+      expect(result.data.LOG_LEVEL).toBe('info');
+    }
+  });
+});
