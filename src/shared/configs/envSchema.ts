@@ -13,7 +13,16 @@ export const envSchema = z.object({
   JWT_SECRET: z
     .string()
     .min(32, 'JWT_SECRET must be at least 32 characters long'),
-  CORS_ORIGIN: z.string().min(1, 'CORS_ORIGIN is required'),
+  CORS_ORIGIN: z
+    .string()
+    .min(1, 'CORS_ORIGIN is required')
+    .transform((value) =>
+      value
+        .split(',')
+        .map((origin) => origin.trim())
+        .filter((origin) => origin.length > 0),
+    )
+    .pipe(z.array(z.url())),
 });
 
 export type Env = z.infer<typeof envSchema>;

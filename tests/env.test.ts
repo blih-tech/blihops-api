@@ -87,4 +87,26 @@ describe('env validation', () => {
       expect(result.data.LOG_LEVEL).toBe('info');
     }
   });
+
+  it('parses comma-separated CORS origins into an array', () => {
+    const result = envSchema.safeParse({
+      ...validEnv,
+      CORS_ORIGIN: 'http://localhost:3000, http://localhost:5173',
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.CORS_ORIGIN).toEqual([
+        'http://localhost:3000',
+        'http://localhost:5173',
+      ]);
+    }
+  });
+
+  it('fails when a CORS origin is not a valid URL', () => {
+    const result = envSchema.safeParse({
+      ...validEnv,
+      CORS_ORIGIN: 'http://localhost:3000,not-a-url',
+    });
+    expect(result.success).toBe(false);
+  });
 });
