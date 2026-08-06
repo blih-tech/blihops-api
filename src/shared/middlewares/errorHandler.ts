@@ -7,7 +7,7 @@ import {
 
 export function errorHandler(
   err: unknown,
-  _req: Request,
+  req: Request,
   res: Response,
   next: NextFunction,
 ): void {
@@ -17,16 +17,15 @@ export function errorHandler(
   }
 
   if (err instanceof AppError) {
-    const isServerError = err.statusCode >= 500;
-    if (!err.isOperational || isServerError) {
-      console.error(err);
+    if (!err.isOperational || err.statusCode >= 500) {
+      req.log.error({ err }, err.message);
     } else {
-      console.error(`[${err.statusCode}] ${err.code}: ${err.message}`);
+      req.log.warn({ err }, err.message);
     }
     res.status(err.statusCode).json(buildErrorEnvelope(err));
     return;
   }
 
-  console.error(err);
+  req.log.error({ err }, 'Unhandled error');
   res.status(500).json(buildInternalErrorEnvelope());
 }
