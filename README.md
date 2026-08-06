@@ -6,6 +6,8 @@ Express backend for blihops.
 
 - Express
 - TypeScript (strict)
+- Prisma (ORM, driver adapters)
+- PostgreSQL (Docker for local dev)
 - zod (validation)
 - pino (logging)
 - Vitest + supertest + testcontainers (testing)
@@ -15,6 +17,7 @@ Express backend for blihops.
 
 - Node.js 24.18+
 - pnpm 11.17.0
+- Docker (for the local database)
 - Git
 
 ## Setup
@@ -26,8 +29,11 @@ cd blihops-api
 npm install --global corepack@latest
 corepack enable pnpm
 
+docker compose up -d db
 pnpm install
-cp .env.example .env.local
+cp .env.example .env
+pnpm db:generate
+pnpm db:migrate
 pnpm dev
 ```
 
@@ -38,7 +44,7 @@ Open http://localhost:4000/health.
 | Command             | Purpose                                                          |
 | ------------------- | ---------------------------------------------------------------- |
 | `pnpm dev`          | Start development (tsx watch)                                    |
-| `pnpm build`        | Compile TypeScript to `dist/`                                    |
+| `pnpm build`        | Compile TypeScript to `dist/` (runs `prisma generate` first)     |
 | `pnpm start`        | Run compiled production build                                    |
 | `pnpm lint`         | Run ESLint                                                       |
 | `pnpm typecheck`    | Run TypeScript checking                                          |
@@ -47,20 +53,31 @@ Open http://localhost:4000/health.
 | `pnpm test`         | Run Vitest suite once                                            |
 | `pnpm test:watch`   | Run Vitest in watch mode                                         |
 | `pnpm check`        | Run all quality checks (lint + typecheck + format:check + build) |
+| `pnpm db:up`        | Start the local Postgres container                               |
+| `pnpm db:down`      | Stop the local Postgres container                                |
+| `pnpm db:reset`     | Stop the container and wipe its data volume                      |
+| `pnpm db:generate`  | Generate the Prisma client into `src/generated/`                 |
+| `pnpm db:migrate`   | Create and apply a dev migration (`prisma migrate dev`)          |
+| `pnpm db:deploy`    | Apply committed migrations (`prisma migrate deploy`)             |
+| `pnpm db:studio`    | Open Prisma Studio                                               |
 
 ## Environment
 
-Copy `.env.example` to `.env.local` and fill in real values. Never commit
-`.env.local` or any other `.env*` file.
+Copy `.env.example` to `.env` and fill in real values. Never commit `.env` or
+any other `.env*` file.
 
-| Variable       | Description                             |
-| -------------- | --------------------------------------- |
-| `NODE_ENV`     | `development` \| `test` \| `production` |
-| `PORT`         | HTTP listen port (default 4000)         |
-| `API_URL`      | Base URL the API exposes itself at      |
-| `DATABASE_URL` | Postgres connection string              |
-| `JWT_SECRET`   | Secret for signing JWTs                 |
-| `CORS_ORIGIN`  | Comma-separated allowed origins         |
+| Variable       | Description                                          |
+| -------------- | ---------------------------------------------------- |
+| `NODE_ENV`     | `development` \| `test` \| `production`              |
+| `PORT`         | HTTP listen port (default 4000)                      |
+| `API_URL`      | Base URL the API exposes itself at                   |
+| `DATABASE_URL` | Postgres connection string (local Docker by default) |
+| `JWT_SECRET`   | Secret for signing JWTs                              |
+| `CORS_ORIGIN`  | Comma-separated allowed origins                      |
+
+The local Postgres from `docker compose` uses
+`postgresql://blihops:blihops@localhost:5432/blihops`. The generated Prisma
+client in `src/generated/` is git-ignored and recreated by `pnpm db:generate`.
 
 ## Repository structure
 
