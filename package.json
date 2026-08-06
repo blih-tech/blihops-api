@@ -7,7 +7,7 @@
   "main": "dist/server.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "tsc",
+    "build": "tsc -p tsconfig.build.json",
     "start": "node dist/server.js",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
@@ -34,6 +34,7 @@
     ]
   },
   "dependencies": {
+    "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "pino": "^10.3.1",
     "pino-http": "^11.0.0",
