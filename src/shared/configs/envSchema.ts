@@ -7,6 +7,7 @@ export const envSchema = z
       .default('development'),
     PORT: z.coerce.number().int().positive().default(4000),
     API_URL: z.string().url(),
+    WEB_URL: z.string().url(),
     LOG_LEVEL: z
       .enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal', 'silent'])
       .default('info'),
