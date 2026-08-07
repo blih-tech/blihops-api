@@ -1,6 +1,7 @@
 import express from 'express';
 import { toNodeHandler } from 'better-auth/node';
 import { auth } from './shared/auth/auth.js';
+import { authRouter } from './features/auth/index.js';
 import { corsMiddleware } from './shared/middlewares/cors.js';
 import { requestLogger } from './shared/middlewares/requestLogger.js';
 import { errorHandler } from './shared/middlewares/errorHandler.js';
@@ -14,7 +15,9 @@ app.use(requestLogger);
 app.use(securityHeaders);
 app.use(corsMiddleware);
 
-app.all('/api/auth/*splat', toNodeHandler(auth));
+app.use('/api/v1/auth', authRouter);
+
+app.all('/api/v1/auth/*splat', toNodeHandler(auth));
 
 app.use(express.json());
 

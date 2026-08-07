@@ -13,6 +13,7 @@ const validEnv = {
   NODE_ENV: 'development',
   PORT: '4000',
   API_URL: 'http://localhost:4000',
+  WEB_URL: 'http://localhost:3000',
   LOG_LEVEL: 'debug',
   DATABASE_URL: 'postgresql://user:password@localhost:5432/blihops',
   BETTER_AUTH_SECRET: 'replace-with-another-32-random-characters',
