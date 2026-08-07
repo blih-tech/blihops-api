@@ -16,7 +16,9 @@ import type {
   AcceptInviteResult,
   InviteBody,
   InviteResult,
+  SessionTokenResult,
 } from './auth.types.js';
+import type { RequestAuth } from '../../shared/middlewares/auth.js';
 
 const ACCEPT_INVITE_PATH = '/auth/accept-invitation';
 
@@ -91,4 +93,8 @@ export async function acceptInvite(
     throw err;
   }
   return { activated: true };
+}
+
+export function getSessionToken(session: RequestAuth): SessionTokenResult {
+  return { token: session.session.token };
 }

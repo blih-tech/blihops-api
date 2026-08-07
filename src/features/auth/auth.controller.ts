@@ -1,9 +1,12 @@
 import type { Request, Response } from 'express';
 
-import { ValidationError } from '../../shared/errors/httpErrors.js';
+import {
+  UnauthorizedError,
+  ValidationError,
+} from '../../shared/errors/httpErrors.js';
 import { sendSuccess } from '../../shared/utils/response.js';
 import { acceptInviteBodySchema, inviteBodySchema } from './auth.schema.js';
-import { acceptInvite, inviteUser } from './auth.service.js';
+import { acceptInvite, getSessionToken, inviteUser } from './auth.service.js';
 
 export async function inviteUserController(req: Request, res: Response) {
   const parsed = inviteBodySchema.safeParse(req.body);
@@ -23,4 +26,12 @@ export async function acceptInviteController(req: Request, res: Response) {
 
   const result = await acceptInvite(parsed.data);
   sendSuccess(res, result);
+}
+
+export function sessionTokenController(req: Request, res: Response) {
+  if (req.auth === undefined) {
+    throw new UnauthorizedError('Authentication required');
+  }
+
+  sendSuccess(res, getSessionToken(req.auth));
 }

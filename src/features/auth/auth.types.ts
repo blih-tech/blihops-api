@@ -19,3 +19,7 @@ export type AcceptInviteBody = {
 export type AcceptInviteResult = {
   activated: boolean;
 };
+
+export type SessionTokenResult = {
+  token: string;
+};

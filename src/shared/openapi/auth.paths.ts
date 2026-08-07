@@ -68,6 +68,28 @@ registry.registerPath({
 
 registry.registerPath({
   method: 'post',
+  path: '/api/v1/auth/session-token',
+  description:
+    'Authenticated. Returns the raw session token for the current session, used to mirror the session into first-party apps.',
+  tags: ['Auth'],
+  security: [{ apiKeyCookie: [] }, { bearerAuth: [] }],
+  responses: {
+    200: {
+      description: 'Session token',
+      content: mediaContent(
+        z.object({
+          data: z.object({
+            token: z.string(),
+          }),
+        }),
+      ),
+    },
+    401: errorResponse('Authentication required'),
+  },
+});
+
+registry.registerPath({
+  method: 'post',
   path: '/api/v1/auth/accept-invite',
   description:
     'Activates an invited account by setting a password with the one-time token from the invite email.',
