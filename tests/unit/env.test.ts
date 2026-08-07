@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { envSchema } from '../src/shared/configs/envSchema.js';
+import { envSchema } from '../../src/shared/configs/envSchema.js';
 
 const without = (obj: Record<string, unknown>, ...keys: string[]) => {
   const copy = { ...obj };
