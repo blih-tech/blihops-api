@@ -1,4 +1,6 @@
 import express from 'express';
+import { toNodeHandler } from 'better-auth/node';
+import { auth } from './shared/auth/auth.js';
 import { corsMiddleware } from './shared/middlewares/cors.js';
 import { requestLogger } from './shared/middlewares/requestLogger.js';
 import { errorHandler } from './shared/middlewares/errorHandler.js';
@@ -11,6 +13,8 @@ const app = express();
 app.use(requestLogger);
 app.use(securityHeaders);
 app.use(corsMiddleware);
+
+app.all('/api/auth/*splat', toNodeHandler(auth));
 
 app.use(express.json());
 

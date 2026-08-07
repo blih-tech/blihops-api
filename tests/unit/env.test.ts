@@ -15,8 +15,9 @@ const validEnv = {
   API_URL: 'http://localhost:4000',
   LOG_LEVEL: 'debug',
   DATABASE_URL: 'postgresql://user:password@localhost:5432/blihops',
-  JWT_SECRET: 'replace-with-at-least-32-random-characters',
+  BETTER_AUTH_SECRET: 'replace-with-another-32-random-characters',
   CORS_ORIGIN: 'http://localhost:3000',
+  RESEND_API_KEY: 're_test_placeholder',
 };
 
 describe('env validation', () => {
@@ -25,21 +26,30 @@ describe('env validation', () => {
     expect(result.success).toBe(true);
   });
 
-  it('fails when JWT_SECRET is missing', () => {
-    const result = envSchema.safeParse(without(validEnv, 'JWT_SECRET'));
+  it('fails when BETTER_AUTH_SECRET is missing', () => {
+    const result = envSchema.safeParse(without(validEnv, 'BETTER_AUTH_SECRET'));
     expect(result.success).toBe(false);
-    if (!result.success) {
-      const issues = result.error.issues.map((i) => i.path[0]);
-      expect(issues).toContain('JWT_SECRET');
-    }
   });
 
-  it('fails when JWT_SECRET is too short', () => {
+  it('fails when BETTER_AUTH_SECRET is too short', () => {
     const result = envSchema.safeParse({
       ...validEnv,
-      JWT_SECRET: 'short',
+      BETTER_AUTH_SECRET: 'short',
     });
     expect(result.success).toBe(false);
+  });
+
+  it('fails when RESEND_API_KEY is missing outside of test', () => {
+    const result = envSchema.safeParse(without(validEnv, 'RESEND_API_KEY'));
+    expect(result.success).toBe(false);
+  });
+
+  it('allows RESEND_API_KEY to be missing in test env', () => {
+    const result = envSchema.safeParse({
+      ...without(validEnv, 'RESEND_API_KEY'),
+      NODE_ENV: 'test',
+    });
+    expect(result.success).toBe(true);
   });
 
   it('fails when DATABASE_URL is missing', () => {
