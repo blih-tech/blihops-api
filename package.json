@@ -13,7 +13,7 @@
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "pnpm lint && pnpm typecheck && pnpm format:check && pnpm build && pnpm test",
+    "check": "pnpm lint && pnpm typecheck && pnpm format:check && pnpm audit --audit-level=high && pnpm build && pnpm test:all",
     "test": "vitest run --project unit",
     "test:watch": "vitest --project unit",
     "test:integration": "vitest run --project integration",
