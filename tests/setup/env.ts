@@ -2,7 +2,6 @@ import 'dotenv/config';
 
 process.env.NODE_ENV ??= 'test';
 process.env.DATABASE_URL ??= 'postgresql://test:test@localhost:5432/test';
-process.env.JWT_SECRET ??= 'test-jwt-secret-must-be-at-least-32-characters';
 process.env.BETTER_AUTH_SECRET ??=
   'test-better-auth-secret-must-be-at-least-32-chars';
 process.env.API_URL ??= 'http://localhost:4000';
