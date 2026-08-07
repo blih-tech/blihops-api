@@ -1,5 +1,6 @@
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
+import { bearer, openAPI } from 'better-auth/plugins';
 
 import { prisma } from '../db/prisma.js';
 import { env } from '../configs/env.js';
@@ -59,4 +60,5 @@ export const auth = betterAuth({
     enabled: true,
   },
   trustedOrigins: env.CORS_ORIGIN,
+  plugins: [openAPI({ disableDefaultReference: true }), bearer()],
 });
