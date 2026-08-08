@@ -59,3 +59,125 @@ model Verification {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 }
+
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+}
+
+model Tag {
+  id          String        @id @default(cuid())
+  name        String        @unique
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  caseStudies CaseStudyTag[]
+  insights    InsightTag[]
+}
+
+model CaseStudyTag {
+  caseStudyId String
+  tagId       String
+  caseStudy   CaseStudy @relation(fields: [caseStudyId], references: [id], onDelete: Cascade)
+  tag         Tag       @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([caseStudyId, tagId])
+}
+
+model InsightTag {
+  insightId String
+  tagId     String
+  insight   Insight @relation(fields: [insightId], references: [id], onDelete: Cascade)
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([insightId, tagId])
+}
+
+model Category {
+  id          String      @id @default(cuid())
+  name        String      @unique
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  caseStudies CaseStudy[]
+  insights    Insight[]
+}
+
+model TrustedLogo {
+  id        String   @id @default(cuid())
+  imageUrl  String
+  alt       String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Testimonial {
+  id        String   @id @default(cuid())
+  avatarUrl String
+  name      String
+  role      String
+  company   String
+  quote     String
+  isPrimary Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ServicesHeroMedia {
+  id        String   @id @default("global")
+  videoUrl  String
+  coverUrl  String
+  altLabel  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CaseStudy {
+  id         String        @id @default(cuid())
+  client     String
+  categoryId String?
+  category   Category?     @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  media      Json
+  status     ContentStatus @default(DRAFT)
+  content    Json
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  tags       CaseStudyTag[]
+}
+
+model Insight {
+  id              String        @id @default(cuid())
+  author          String
+  categoryId      String?
+  category        Category?     @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  readTimeMinutes Int
+  media           Json
+  status          ContentStatus @default(DRAFT)
+  content         Json
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  tags            InsightTag[]
+}
+
+model CareerRole {
+  id               String   @id @default(cuid())
+  title            String
+  slug             String   @unique
+  department       String
+  location         String
+  employmentType   String
+  summary          String
+  overview         String[]
+  responsibilities String[]
+  requirements     String[]
+  isActive         Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model PilotFaq {
+  id           String   @id @default(cuid())
+  content      Json
+  isActive     Boolean  @default(false)
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
