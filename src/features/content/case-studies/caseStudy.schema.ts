@@ -1,19 +1,11 @@
 import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
 import { z } from 'zod';
 
-import {
-  mediaUrlSchema,
-  metaSchema,
-  pageQuerySchema,
-} from '../common/schemas.js';
+import { mediaSchema, metaSchema, pageQuerySchema } from '../common/schemas.js';
 
 extendZodWithOpenApi(z);
 
-export const mediaSchema = z.object({
-  type: z.enum(['image', 'video']),
-  url: mediaUrlSchema,
-  alt: z.string().trim().max(160).optional(),
-});
+export { mediaSchema };
 
 export const caseStudyBodySchema = z.object({
   challenge: z.string(),
