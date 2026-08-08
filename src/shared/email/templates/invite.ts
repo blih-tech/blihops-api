@@ -15,6 +15,7 @@ const ROLE_LABELS: Record<InviteRole, string> = {
 };
 
 export function inviteTemplate(
+  logoUrl: string,
   inviteUrl: string,
   invitedName: string,
   role: InviteRole,
@@ -24,6 +25,7 @@ export function inviteTemplate(
   return {
     subject: `You've been invited to ${area}`,
     html: renderEmailLayout({
+      logoUrl,
       heading: "You're invited",
       body: `
         <p style="margin: 0;">Hi ${invitedName},</p>

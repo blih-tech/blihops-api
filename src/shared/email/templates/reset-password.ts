@@ -6,10 +6,14 @@ export type ResetPasswordTemplate = {
   text: string;
 };
 
-export function resetPasswordTemplate(resetUrl: string): ResetPasswordTemplate {
+export function resetPasswordTemplate(
+  logoUrl: string,
+  resetUrl: string,
+): ResetPasswordTemplate {
   return {
     subject: 'Reset your Blih Ops password',
     html: renderEmailLayout({
+      logoUrl,
       heading: 'Reset your password',
       body: `
         <p style="margin: 0;">We received a request to reset the password for your Blih Ops account. Click the button below to choose a new password. This link is single-use and expires shortly.</p>

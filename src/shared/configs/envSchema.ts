@@ -30,6 +30,7 @@ export const envSchema = z
       .string()
       .trim()
       .default('Blih Ops <noreply@mail.blihops.com>'),
+    EMAIL_LOGO_URL: z.string().url(),
   })
   .superRefine((env, ctx) => {
     if (env.NODE_ENV !== 'test' && !env.RESEND_API_KEY) {
