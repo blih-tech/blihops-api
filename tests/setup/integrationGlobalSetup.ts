@@ -20,7 +20,9 @@ const runPrisma = (args: string[], extraEnv: NodeJS.ProcessEnv = {}) => {
 
 export async function setup() {
   container = await new PostgreSqlContainer('postgres:17-alpine').start();
-  process.env.DATABASE_URL = container.getConnectionUri();
+  const connectionUri = container.getConnectionUri();
+  process.env.DATABASE_URL = connectionUri;
+  process.env.DIRECT_URL = connectionUri;
 
   runPrisma(['generate']);
   runPrisma(['db', 'push', '--accept-data-loss'], {
