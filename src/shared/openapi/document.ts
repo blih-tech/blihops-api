@@ -26,6 +26,7 @@ const PUBLIC_PATHS = new Set([
   '/api/v1/auth/reset-password/{token}',
   '/api/v1/auth/accept-invite',
   '/api/v1/content/tags',
+  '/api/v1/content/categories',
 ]);
 
 const COOKIE_SECURITY = [{ apiKeyCookie: [] }];
