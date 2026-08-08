@@ -1,8 +1,11 @@
-import { Prisma } from '../../../../generated/prisma/client.js';
 import {
   ConflictError,
   NotFoundError,
 } from '../../../../shared/errors/httpErrors.js';
+import {
+  isRecordNotFound,
+  isUniqueViolation,
+} from '../../common/prismaErrors.js';
 import type { TagResponse } from '../../tags/tag.schema.js';
 import { toTagResponse } from '../../tags/tag.service.js';
 import {
@@ -12,9 +15,6 @@ import {
   findTagByName,
   updateTagRecord,
 } from './tag.repository.js';
-
-const isUniqueViolation = (err: unknown): boolean =>
-  err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002';
 
 export async function createTag(payload: {
   name: string;
@@ -56,6 +56,9 @@ export async function updateTag(
     if (isUniqueViolation(err)) {
       throw new ConflictError('A tag with this name already exists');
     }
+    if (isRecordNotFound(err)) {
+      throw new NotFoundError('Tag not found');
+    }
     throw err;
   }
 }
@@ -66,5 +69,12 @@ export async function deleteTag(id: string): Promise<void> {
     throw new NotFoundError('Tag not found');
   }
 
-  await deleteTagRecord(id);
+  try {
+    await deleteTagRecord(id);
+  } catch (err) {
+    if (isRecordNotFound(err)) {
+      throw new NotFoundError('Tag not found');
+    }
+    throw err;
+  }
 }
