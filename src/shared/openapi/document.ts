@@ -32,6 +32,8 @@ const PUBLIC_PATHS = new Set([
   '/api/v1/content/services-hero',
   '/api/v1/content/case-studies',
   '/api/v1/content/case-studies/{slug}',
+  '/api/v1/content/insights',
+  '/api/v1/content/insights/{slug}',
 ]);
 
 const COOKIE_SECURITY = [{ apiKeyCookie: [] }];

@@ -14,6 +14,12 @@ export const mediaUrlSchema = z
   .url('Enter a valid URL')
   .max(2048, 'Keep the URL under 2048 characters');
 
+export const mediaSchema = z.object({
+  type: z.enum(['image', 'video']),
+  url: mediaUrlSchema,
+  alt: z.string().trim().max(160).optional(),
+});
+
 export const altTextSchema = z
   .string()
   .trim()

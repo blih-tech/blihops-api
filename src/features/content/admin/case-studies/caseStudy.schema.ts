@@ -3,6 +3,7 @@ import { z } from 'zod';
 
 import {
   idParamSchema,
+  mediaSchema,
   pageQuerySchema,
   slugSchema,
 } from '../../common/schemas.js';
@@ -11,7 +12,6 @@ import {
   caseStudiesSchema,
   getCaseStudyDetailResponseSchema,
   getCaseStudiesResponseSchema,
-  mediaSchema,
 } from '../../case-studies/caseStudy.schema.js';
 
 extendZodWithOpenApi(z);
