@@ -27,6 +27,7 @@ const PUBLIC_PATHS = new Set([
   '/api/v1/auth/accept-invite',
   '/api/v1/content/tags',
   '/api/v1/content/categories',
+  '/api/v1/content/logos',
 ]);
 
 const COOKIE_SECURITY = [{ apiKeyCookie: [] }];
