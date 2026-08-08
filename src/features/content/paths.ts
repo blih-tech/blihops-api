@@ -3,3 +3,4 @@ import './categories/category.paths.js';
 import './logos/logo.paths.js';
 import './testimonials/testimonial.paths.js';
 import './services-hero/servicesHero.paths.js';
+import './case-studies/caseStudy.paths.js';

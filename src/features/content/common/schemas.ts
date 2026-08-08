@@ -31,3 +31,16 @@ export const longTextSchema = z
   .trim()
   .min(1, 'Text is required')
   .max(2000, 'Keep the text under 2000 characters');
+
+export const slugSchema = z
+  .string()
+  .regex(
+    /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+    'Use lowercase letters, numbers, and hyphens',
+  )
+  .max(100, 'Keep the slug under 100 characters');
+
+export const pageQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1).optional(),
+  pageSize: z.coerce.number().int().min(1).max(100).default(12).optional(),
+});

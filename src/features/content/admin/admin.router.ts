@@ -1,6 +1,7 @@
 import { Router } from 'express';
 
 import { requireAuth, requireRole } from '../../../shared/middlewares/auth.js';
+import { adminCaseStudyRouter } from './case-studies/index.js';
 import { adminCategoryRouter } from './categories/index.js';
 import { adminLogoRouter } from './logos/index.js';
 import { adminServicesHeroRouter } from './services-hero/index.js';
@@ -16,3 +17,4 @@ adminContentRouter.use('/categories', adminCategoryRouter);
 adminContentRouter.use('/logos', adminLogoRouter);
 adminContentRouter.use('/testimonials', adminTestimonialRouter);
 adminContentRouter.use('/services-hero', adminServicesHeroRouter);
+adminContentRouter.use('/case-studies', adminCaseStudyRouter);
