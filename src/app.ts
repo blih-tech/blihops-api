@@ -2,6 +2,7 @@ import express from 'express';
 import { toNodeHandler } from 'better-auth/node';
 import { auth } from './shared/auth/auth.js';
 import { authRouter } from './features/auth/index.js';
+import { contentRouter } from './features/content/index.js';
 import { corsMiddleware } from './shared/middlewares/cors.js';
 import { openapiRouter } from './shared/middlewares/openapi.js';
 import { requestLogger } from './shared/middlewares/requestLogger.js';
@@ -26,6 +27,8 @@ app.use('/api/v1/auth', authRouter);
 app.all('/api/v1/auth/*splat', toNodeHandler(auth));
 
 app.use(express.json());
+
+app.use('/api/v1/content', contentRouter);
 
 app.get('/health', (_req, res) => {
   sendSuccess(res, { status: 'ok' });
