@@ -28,6 +28,7 @@ const PUBLIC_PATHS = new Set([
   '/api/v1/content/tags',
   '/api/v1/content/categories',
   '/api/v1/content/logos',
+  '/api/v1/content/testimonials',
 ]);
 
 const COOKIE_SECURITY = [{ apiKeyCookie: [] }];

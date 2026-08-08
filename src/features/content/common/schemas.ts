@@ -19,3 +19,15 @@ export const altTextSchema = z
   .trim()
   .min(1, 'Alt text is required')
   .max(160, 'Keep the alt text under 160 characters');
+
+export const shortTextSchema = z
+  .string()
+  .trim()
+  .min(1, 'Text is required')
+  .max(100, 'Keep the text under 100 characters');
+
+export const longTextSchema = z
+  .string()
+  .trim()
+  .min(1, 'Text is required')
+  .max(2000, 'Keep the text under 2000 characters');
