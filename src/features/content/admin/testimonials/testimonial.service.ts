@@ -48,7 +48,7 @@ export async function updateTestimonial(
     if (payload.isPrimary === true) {
       const [, updated] = await prisma.$transaction([
         clearPrimaryTestimonial(),
-        updateTestimonialRecord(id, merged),
+        updateTestimonialRecord(id, { ...merged, isPrimary: true }),
       ]);
       return toTestimonialResponse(updated);
     }

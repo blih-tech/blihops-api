@@ -16,7 +16,10 @@ export function findTestimonialById(id: string) {
   return prisma.testimonial.findUnique({ where: { id } });
 }
 
-export function updateTestimonialRecord(id: string, data: TestimonialData) {
+export function updateTestimonialRecord(
+  id: string,
+  data: TestimonialData & { isPrimary?: boolean },
+) {
   return prisma.testimonial.update({ where: { id }, data });
 }
 
