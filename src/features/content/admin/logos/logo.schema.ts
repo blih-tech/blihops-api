@@ -1,10 +1,10 @@
-import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
+﻿import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
 import { z } from 'zod';
 
 import {
   altTextSchema,
   idParamSchema,
-  imageUrlSchema,
+  mediaUrlSchema,
 } from '../../common/schemas.js';
 import {
   getLogosResponseSchema,
@@ -16,7 +16,7 @@ extendZodWithOpenApi(z);
 export { getLogosResponseSchema };
 
 export const createLogoBodySchema = z.object({
-  imageUrl: imageUrlSchema,
+  imageUrl: mediaUrlSchema,
   alt: altTextSchema,
 });
 
@@ -30,7 +30,7 @@ export const updateLogoParamsSchema = z.object({
 
 export const updateLogoBodySchema = z
   .object({
-    imageUrl: imageUrlSchema.optional(),
+    imageUrl: mediaUrlSchema.optional(),
     alt: altTextSchema.optional(),
   })
   .refine((data) => data.imageUrl !== undefined || data.alt !== undefined, {

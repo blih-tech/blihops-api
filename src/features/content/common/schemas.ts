@@ -10,7 +10,7 @@ export const idParamSchema = z.string().min(1, 'Id is required').max(50);
 
 export const metaSchema = z.record(z.string(), z.unknown());
 
-export const imageUrlSchema = z
+export const mediaUrlSchema = z
   .url('Enter a valid URL')
   .max(2048, 'Keep the URL under 2048 characters');
 
