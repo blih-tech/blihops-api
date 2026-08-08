@@ -13,12 +13,23 @@ export function validate(part: RequestPart, schema: z.ZodTypeAny) {
       return;
     }
 
-    const target = req as unknown as {
-      body: unknown;
-      params: unknown;
-      query: unknown;
-    };
-    target[part] = result.data;
+    if (part === 'query') {
+      // Express defines req.query as a getter-only property; shadow it with
+      // an own data property (the getter is configurable).
+      Object.defineProperty(req, 'query', {
+        value: result.data,
+        configurable: true,
+        enumerable: true,
+        writable: true,
+      });
+    } else {
+      const target = req as unknown as {
+        body: unknown;
+        params: unknown;
+        query: unknown;
+      };
+      target[part] = result.data;
+    }
     next();
   };
 }
