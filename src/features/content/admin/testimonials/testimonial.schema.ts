@@ -1,9 +1,9 @@
-import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
+﻿import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
 import { z } from 'zod';
 
 import {
   idParamSchema,
-  imageUrlSchema,
+  mediaUrlSchema,
   longTextSchema,
   shortTextSchema,
 } from '../../common/schemas.js';
@@ -17,7 +17,7 @@ extendZodWithOpenApi(z);
 export { getTestimonialsResponseSchema };
 
 export const createTestimonialBodySchema = z.object({
-  avatarUrl: imageUrlSchema,
+  avatarUrl: mediaUrlSchema,
   name: shortTextSchema,
   role: shortTextSchema,
   company: shortTextSchema,
@@ -34,7 +34,7 @@ export const updateTestimonialParamsSchema = z.object({
 
 export const updateTestimonialBodySchema = z
   .object({
-    avatarUrl: imageUrlSchema.optional(),
+    avatarUrl: mediaUrlSchema.optional(),
     name: shortTextSchema.optional(),
     role: shortTextSchema.optional(),
     company: shortTextSchema.optional(),
