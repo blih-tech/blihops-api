@@ -4,6 +4,7 @@ import { auth } from '../auth/auth.js';
 import { env } from '../configs/env.js';
 import { registry } from './registry.js';
 import './auth.paths.js';
+import '../../features/content/paths.js';
 
 const AUTH_BASE_PATH = '/api/v1/auth';
 
@@ -24,6 +25,7 @@ const PUBLIC_PATHS = new Set([
   '/api/v1/auth/reset-password',
   '/api/v1/auth/reset-password/{token}',
   '/api/v1/auth/accept-invite',
+  '/api/v1/content/tags',
 ]);
 
 const COOKIE_SECURITY = [{ apiKeyCookie: [] }];
@@ -91,6 +93,7 @@ export async function generateOpenApiDocument() {
     servers: [{ url: env.API_URL }],
     tags: [
       { name: 'Auth', description: 'Authentication and account management' },
+      { name: 'Content', description: 'Managed website content' },
     ],
     paths,
     components: {

@@ -1,42 +1,14 @@
 import { z } from 'zod';
 
+import { mediaContent, requestBody, errorResponse } from './common.js';
 import { registry } from './registry.js';
 import {
   acceptInviteBodySchema,
   inviteBodySchema,
 } from '../../features/auth/auth.schema.js';
 
-const errorEnvelopeSchema = z.object({
-  error: z.object({
-    code: z.string(),
-    message: z.string(),
-    details: z
-      .array(
-        z.object({
-          path: z.string().optional(),
-          message: z.string(),
-        }),
-      )
-      .optional(),
-  }),
-});
-
 registry.register('InviteBody', inviteBodySchema);
 registry.register('AcceptInviteBody', acceptInviteBodySchema);
-registry.register('ErrorEnvelope', errorEnvelopeSchema);
-
-const mediaContent = (schema: z.ZodTypeAny) => ({
-  'application/json': { schema },
-});
-
-const requestBody = (schema: z.ZodTypeAny) => ({
-  content: mediaContent(schema),
-});
-
-const errorResponse = (description: string) => ({
-  description,
-  content: mediaContent(errorEnvelopeSchema),
-});
 
 registry.registerPath({
   method: 'post',
