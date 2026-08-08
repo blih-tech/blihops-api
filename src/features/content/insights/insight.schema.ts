@@ -37,6 +37,7 @@ export const insightCategorySchema = z.object({
 export const insightsSchema = z.object({
   id: z.string(),
   author: z.string(),
+  readTimeMinutes: z.number(),
   category: insightCategorySchema.nullable(),
   media: mediaSchema,
   status: z.enum(['DRAFT', 'PUBLISHED']),
@@ -52,6 +53,7 @@ export const insightListItemSchema = z.object({
   titles: z.object({ en: z.string(), de: z.string() }),
   excerpts: z.object({ en: z.string(), de: z.string() }),
   author: z.string(),
+  readTimeMinutes: z.number(),
   category: insightCategorySchema.nullable(),
   media: mediaSchema,
   tags: z.array(insightTagSchema),
@@ -88,6 +90,7 @@ export type InsightContent = {
 export type InsightDetail = {
   id: string;
   author: string;
+  readTimeMinutes: number;
   category: { id: string; name: string } | null;
   media: { type: 'image' | 'video'; url: string; alt?: string };
   status: 'DRAFT' | 'PUBLISHED';
