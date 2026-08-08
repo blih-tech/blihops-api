@@ -134,4 +134,14 @@ describe('env validation', () => {
     });
     expect(result.success).toBe(false);
   });
+
+  it('fails when DIRECT_URL is empty', () => {
+    const result = envSchema.safeParse({ ...validEnv, DIRECT_URL: '' });
+    expect(result.success).toBe(false);
+  });
+
+  it('allows DIRECT_URL to be missing', () => {
+    const result = envSchema.safeParse(without(validEnv, 'DIRECT_URL'));
+    expect(result.success).toBe(true);
+  });
 });

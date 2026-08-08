@@ -12,6 +12,7 @@ export const envSchema = z
       .enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal', 'silent'])
       .default('info'),
     DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
+    DIRECT_URL: z.string().min(1).optional(),
     BETTER_AUTH_SECRET: z
       .string()
       .min(32, 'BETTER_AUTH_SECRET must be at least 32 characters long'),
