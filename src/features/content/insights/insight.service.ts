@@ -21,6 +21,7 @@ function toInsightDetail(insight: InsightWithRelations): InsightDetail {
   return {
     id: insight.id,
     author: insight.author,
+    readTimeMinutes: insight.readTimeMinutes,
     category:
       insight.category === null
         ? null
@@ -53,6 +54,7 @@ function toInsightListItem(insight: InsightWithRelations): InsightListItem {
       de: content.de?.excerpt ?? '',
     },
     author: insight.author,
+    readTimeMinutes: insight.readTimeMinutes,
     category:
       insight.category === null
         ? null

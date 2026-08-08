@@ -58,6 +58,7 @@ function toListItem(insight: InsightRecord): InsightListItem {
       de: content.de?.excerpt ?? '',
     },
     author: insight.author,
+    readTimeMinutes: insight.readTimeMinutes,
     category:
       insight.category === null
         ? null
