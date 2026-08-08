@@ -44,8 +44,8 @@ export const auth = betterAuth({
       const isInvite = request?.headers.get('x-invite-flow') === '1';
       const role = (user as unknown as { role: AuthRole }).role;
       const template = isInvite
-        ? inviteTemplate(url, user.name, role)
-        : resetPasswordTemplate(url);
+        ? inviteTemplate(env.EMAIL_LOGO_URL, url, user.name, role)
+        : resetPasswordTemplate(env.EMAIL_LOGO_URL, url);
       void emailClient
         .send({ to: user.email, ...template })
         .catch((err) =>

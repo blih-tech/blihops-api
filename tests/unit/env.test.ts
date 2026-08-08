@@ -19,6 +19,7 @@ const validEnv = {
   BETTER_AUTH_SECRET: 'replace-with-another-32-random-characters',
   CORS_ORIGIN: 'http://localhost:3000',
   RESEND_API_KEY: 're_test_placeholder',
+  EMAIL_LOGO_URL: 'https://blihops.com/logo.png',
 };
 
 describe('env validation', () => {
@@ -117,6 +118,19 @@ describe('env validation', () => {
     const result = envSchema.safeParse({
       ...validEnv,
       CORS_ORIGIN: 'http://localhost:3000,not-a-url',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('fails when EMAIL_LOGO_URL is missing', () => {
+    const result = envSchema.safeParse(without(validEnv, 'EMAIL_LOGO_URL'));
+    expect(result.success).toBe(false);
+  });
+
+  it('fails when EMAIL_LOGO_URL is not a valid URL', () => {
+    const result = envSchema.safeParse({
+      ...validEnv,
+      EMAIL_LOGO_URL: 'not-a-url',
     });
     expect(result.success).toBe(false);
   });
