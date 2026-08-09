@@ -1,6 +1,7 @@
 import { Router } from 'express';
 
 import { adminContentRouter } from './admin/admin.router.js';
+import { careerRouter } from './careers/index.js';
 import { caseStudyRouter } from './case-studies/index.js';
 import { categoryRouter } from './categories/index.js';
 import { insightRouter } from './insights/index.js';
@@ -18,4 +19,5 @@ contentRouter.use('/testimonials', testimonialRouter);
 contentRouter.use('/services-hero', servicesHeroRouter);
 contentRouter.use('/case-studies', caseStudyRouter);
 contentRouter.use('/insights', insightRouter);
+contentRouter.use('/careers', careerRouter);
 contentRouter.use('/admin', adminContentRouter);
