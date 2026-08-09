@@ -16,8 +16,13 @@ import {
 } from './testimonial.repository.js';
 
 export type CreateTestimonialPayload = TestimonialData;
-export type UpdateTestimonialPayload = Partial<TestimonialData> & {
-  isPrimary?: true;
+export type UpdateTestimonialPayload = {
+  avatarUrl?: string | undefined;
+  name?: string | undefined;
+  role?: string | undefined;
+  company?: string | undefined;
+  quote?: string | undefined;
+  isPrimary?: true | undefined;
 };
 
 export async function createTestimonial(

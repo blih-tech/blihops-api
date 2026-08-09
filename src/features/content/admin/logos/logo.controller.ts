@@ -1,14 +1,19 @@
 import type { Request, Response } from 'express';
 
+import {
+  type BodyAndParamsOf,
+  type BodyOf,
+  type ParamsOf,
+} from '../../../../shared/middlewares/validate.js';
 import { sendMany, sendSuccess } from '../../../../shared/utils/response.js';
 import { listLogos } from '../../logos/logo.service.js';
 import {
-  createLogo,
-  deleteLogo,
-  type CreateLogoPayload,
-  type UpdateLogoPayload,
-  updateLogo,
-} from './logo.service.js';
+  createLogoBodySchema,
+  deleteLogoParamsSchema,
+  updateLogoBodySchema,
+  updateLogoParamsSchema,
+} from './logo.schema.js';
+import { createLogo, deleteLogo, updateLogo } from './logo.service.js';
 
 export async function getAdminLogosController(_req: Request, res: Response) {
   const logos = await listLogos();
@@ -16,7 +21,7 @@ export async function getAdminLogosController(_req: Request, res: Response) {
 }
 
 export async function createLogoController(
-  req: Request<Record<string, string>, unknown, CreateLogoPayload>,
+  req: BodyOf<typeof createLogoBodySchema>,
   res: Response,
 ) {
   const logo = await createLogo(req.body);
@@ -24,7 +29,10 @@ export async function createLogoController(
 }
 
 export async function updateLogoController(
-  req: Request<{ id: string }, unknown, UpdateLogoPayload>,
+  req: BodyAndParamsOf<
+    typeof updateLogoBodySchema,
+    typeof updateLogoParamsSchema
+  >,
   res: Response,
 ) {
   const logo = await updateLogo(req.params.id, req.body);
@@ -32,7 +40,7 @@ export async function updateLogoController(
 }
 
 export async function deleteLogoController(
-  req: Request<{ id: string }>,
+  req: ParamsOf<typeof deleteLogoParamsSchema>,
   res: Response,
 ) {
   await deleteLogo(req.params.id);

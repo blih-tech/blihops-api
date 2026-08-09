@@ -14,7 +14,10 @@ import type {
   InsightListItem,
   InsightLocaleContent,
 } from '../../insights/insight.schema.js';
-import { toInsightDetail } from '../../insights/insight.service.js';
+import {
+  toInsightDetail,
+  toInsightListItem,
+} from '../../insights/insight.service.js';
 import {
   createInsightRecord,
   deleteInsightRecord,
@@ -48,25 +51,7 @@ function sanitizePartialContent(
 }
 
 function toListItem(insight: InsightRecord): InsightListItem {
-  const content = insight.content as InsightContent;
-  return {
-    id: insight.id,
-    slugs: { en: content.en?.slug ?? '', de: content.de?.slug ?? '' },
-    titles: { en: content.en?.title ?? '', de: content.de?.title ?? '' },
-    excerpts: {
-      en: content.en?.excerpt ?? '',
-      de: content.de?.excerpt ?? '',
-    },
-    author: insight.author,
-    readTimeMinutes: insight.readTimeMinutes,
-    category:
-      insight.category === null
-        ? null
-        : { id: insight.category.id, name: insight.category.name },
-    media: insight.media as InsightListItem['media'],
-    tags: insight.tags.map((row) => ({ id: row.tag.id, name: row.tag.name })),
-    createdAt: insight.createdAt.toISOString(),
-  };
+  return toInsightListItem(insight);
 }
 
 export async function listAdminInsights(params: {

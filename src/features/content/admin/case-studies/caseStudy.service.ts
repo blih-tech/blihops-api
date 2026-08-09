@@ -14,7 +14,10 @@ import type {
   CaseStudyListItem,
   CaseStudyLocaleContent,
 } from '../../case-studies/caseStudy.schema.js';
-import { toCaseStudyDetail } from '../../case-studies/caseStudy.service.js';
+import {
+  toCaseStudyDetail,
+  toCaseStudyListItem,
+} from '../../case-studies/caseStudy.service.js';
 import {
   createCaseStudyRecord,
   deleteCaseStudyRecord,
@@ -59,24 +62,7 @@ function sanitizePartialContent(
 }
 
 function toListItem(caseStudy: CaseStudyRecord): CaseStudyListItem {
-  const content = caseStudy.content as CaseStudyContent;
-  return {
-    id: caseStudy.id,
-    slugs: { en: content.en?.slug ?? '', de: content.de?.slug ?? '' },
-    titles: { en: content.en?.title ?? '', de: content.de?.title ?? '' },
-    summaries: {
-      en: content.en?.summary ?? '',
-      de: content.de?.summary ?? '',
-    },
-    client: caseStudy.client,
-    category:
-      caseStudy.category === null
-        ? null
-        : { id: caseStudy.category.id, name: caseStudy.category.name },
-    media: caseStudy.media as CaseStudyListItem['media'],
-    tags: caseStudy.tags.map((row) => ({ id: row.tag.id, name: row.tag.name })),
-    createdAt: caseStudy.createdAt.toISOString(),
-  };
+  return toCaseStudyListItem(caseStudy);
 }
 
 export async function listAdminCaseStudies(params: {

@@ -1,14 +1,13 @@
 import type { Request, Response } from 'express';
 
+import { type BodyOf } from '../../../../shared/middlewares/validate.js';
 import { sendSuccess } from '../../../../shared/utils/response.js';
 import {
   getServicesHero,
   toServicesHeroResponse,
 } from '../../services-hero/servicesHero.service.js';
-import {
-  type PutServicesHeroPayload,
-  saveServicesHero,
-} from './servicesHero.service.js';
+import { putServicesHeroBodySchema } from './servicesHero.schema.js';
+import { saveServicesHero } from './servicesHero.service.js';
 
 export async function getAdminServicesHeroController(
   _req: Request,
@@ -19,7 +18,7 @@ export async function getAdminServicesHeroController(
 }
 
 export async function putServicesHeroController(
-  req: Request<Record<string, string>, unknown, PutServicesHeroPayload>,
+  req: BodyOf<typeof putServicesHeroBodySchema>,
   res: Response,
 ) {
   const hero = await saveServicesHero(req.body);

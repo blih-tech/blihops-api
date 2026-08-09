@@ -1,7 +1,18 @@
 import type { Request, Response } from 'express';
 
+import {
+  type BodyAndParamsOf,
+  type BodyOf,
+  type ParamsOf,
+} from '../../../../shared/middlewares/validate.js';
 import { sendMany, sendSuccess } from '../../../../shared/utils/response.js';
 import { listCategories } from '../../categories/category.service.js';
+import {
+  createCategoryBodySchema,
+  deleteCategoryParamsSchema,
+  updateCategoryBodySchema,
+  updateCategoryParamsSchema,
+} from './category.schema.js';
 import {
   createCategory,
   deleteCategory,
@@ -17,7 +28,7 @@ export async function getAdminCategoriesController(
 }
 
 export async function createCategoryController(
-  req: Request<Record<string, string>, unknown, { name: string }>,
+  req: BodyOf<typeof createCategoryBodySchema>,
   res: Response,
 ) {
   const category = await createCategory(req.body);
@@ -25,7 +36,10 @@ export async function createCategoryController(
 }
 
 export async function updateCategoryController(
-  req: Request<{ id: string }, unknown, { name: string }>,
+  req: BodyAndParamsOf<
+    typeof updateCategoryBodySchema,
+    typeof updateCategoryParamsSchema
+  >,
   res: Response,
 ) {
   const category = await updateCategory(req.params.id, req.body);
@@ -33,7 +47,7 @@ export async function updateCategoryController(
 }
 
 export async function deleteCategoryController(
-  req: Request<{ id: string }>,
+  req: ParamsOf<typeof deleteCategoryParamsSchema>,
   res: Response,
 ) {
   await deleteCategory(req.params.id);

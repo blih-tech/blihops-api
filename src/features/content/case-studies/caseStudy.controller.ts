@@ -1,21 +1,22 @@
-import type { Request, Response } from 'express';
-import { z } from 'zod';
+import type { Response } from 'express';
 
+import {
+  type ParamsOf,
+  type QueryOf,
+} from '../../../shared/middlewares/validate.js';
 import { setPublicCache } from '../common/cache.js';
 import { sendMany, sendSuccess } from '../../../shared/utils/response.js';
-import type { caseStudyListQuerySchema } from './caseStudy.schema.js';
+import {
+  caseStudyListQuerySchema,
+  caseStudySlugParamsSchema,
+} from './caseStudy.schema.js';
 import {
   getPublicCaseStudyBySlug,
   listPublicCaseStudies,
 } from './caseStudy.service.js';
 
 export async function listCaseStudiesController(
-  req: Request<
-    Record<string, string>,
-    unknown,
-    unknown,
-    z.infer<typeof caseStudyListQuerySchema>
-  >,
+  req: QueryOf<typeof caseStudyListQuerySchema>,
   res: Response,
 ) {
   const page = req.query.page ?? 1;
@@ -31,7 +32,7 @@ export async function listCaseStudiesController(
 }
 
 export async function getCaseStudyBySlugController(
-  req: Request<{ slug: string }>,
+  req: ParamsOf<typeof caseStudySlugParamsSchema>,
   res: Response,
 ) {
   const caseStudy = await getPublicCaseStudyBySlug(req.params.slug);

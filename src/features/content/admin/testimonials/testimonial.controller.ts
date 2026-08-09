@@ -1,12 +1,21 @@
 import type { Request, Response } from 'express';
 
+import {
+  type BodyAndParamsOf,
+  type BodyOf,
+  type ParamsOf,
+} from '../../../../shared/middlewares/validate.js';
 import { sendMany, sendSuccess } from '../../../../shared/utils/response.js';
 import { listTestimonials } from '../../testimonials/testimonial.service.js';
 import {
+  createTestimonialBodySchema,
+  deleteTestimonialParamsSchema,
+  updateTestimonialBodySchema,
+  updateTestimonialParamsSchema,
+} from './testimonial.schema.js';
+import {
   createTestimonial,
   deleteTestimonial,
-  type CreateTestimonialPayload,
-  type UpdateTestimonialPayload,
   updateTestimonial,
 } from './testimonial.service.js';
 
@@ -19,7 +28,7 @@ export async function getAdminTestimonialsController(
 }
 
 export async function createTestimonialController(
-  req: Request<Record<string, string>, unknown, CreateTestimonialPayload>,
+  req: BodyOf<typeof createTestimonialBodySchema>,
   res: Response,
 ) {
   const testimonial = await createTestimonial(req.body);
@@ -27,7 +36,10 @@ export async function createTestimonialController(
 }
 
 export async function updateTestimonialController(
-  req: Request<{ id: string }, unknown, UpdateTestimonialPayload>,
+  req: BodyAndParamsOf<
+    typeof updateTestimonialBodySchema,
+    typeof updateTestimonialParamsSchema
+  >,
   res: Response,
 ) {
   const testimonial = await updateTestimonial(req.params.id, req.body);
@@ -35,7 +47,7 @@ export async function updateTestimonialController(
 }
 
 export async function deleteTestimonialController(
-  req: Request<{ id: string }>,
+  req: ParamsOf<typeof deleteTestimonialParamsSchema>,
   res: Response,
 ) {
   await deleteTestimonial(req.params.id);

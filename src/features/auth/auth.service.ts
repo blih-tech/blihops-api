@@ -5,7 +5,6 @@ import { hashPassword } from 'better-auth/crypto';
 import { auth } from '../../shared/auth/auth.js';
 import { logger } from '../../shared/configs/logger.js';
 import { env } from '../../shared/configs/env.js';
-import { prisma } from '../../shared/db/prisma.js';
 import {
   BadRequestError,
   ConflictError,
@@ -19,13 +18,15 @@ import type {
   SessionTokenResult,
 } from './auth.types.js';
 import type { RequestAuth } from '../../shared/middlewares/auth.js';
+import {
+  createUserWithCredentialAccount,
+  findUserByEmail,
+} from './auth.repository.js';
 
 const ACCEPT_INVITE_PATH = '/auth/accept-invitation';
 
 export async function inviteUser(payload: InviteBody): Promise<InviteResult> {
-  const existing = await prisma.user.findUnique({
-    where: { email: payload.email },
-  });
+  const existing = await findUserByEmail(payload.email);
   if (existing !== null) {
     throw new ConflictError('A user with this email already exists');
   }
@@ -34,26 +35,13 @@ export async function inviteUser(payload: InviteBody): Promise<InviteResult> {
   const tempPassword = randomUUID() + randomUUID();
   const passwordHash = await hashPassword(tempPassword);
 
-  await prisma.$transaction([
-    prisma.user.create({
-      data: {
-        id: userId,
-        name: payload.name,
-        email: payload.email,
-        emailVerified: true,
-        role: payload.role,
-      },
-    }),
-    prisma.account.create({
-      data: {
-        id: randomUUID(),
-        userId,
-        accountId: userId,
-        providerId: 'credential',
-        password: passwordHash,
-      },
-    }),
-  ]);
+  await createUserWithCredentialAccount({
+    id: userId,
+    name: payload.name,
+    email: payload.email,
+    role: payload.role,
+    passwordHash,
+  });
 
   try {
     await auth.api.requestPasswordReset({

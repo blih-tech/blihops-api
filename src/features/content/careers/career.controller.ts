@@ -1,18 +1,19 @@
-import type { Request, Response } from 'express';
-import { z } from 'zod';
+import type { Response } from 'express';
 
+import {
+  type ParamsOf,
+  type QueryOf,
+} from '../../../shared/middlewares/validate.js';
 import { setPublicCache } from '../common/cache.js';
 import { sendMany, sendSuccess } from '../../../shared/utils/response.js';
-import type { careerListQuerySchema } from './career.schema.js';
+import {
+  careerListQuerySchema,
+  careerSlugParamsSchema,
+} from './career.schema.js';
 import { getPublicCareerBySlug, listPublicCareers } from './career.service.js';
 
 export async function listCareersController(
-  req: Request<
-    Record<string, string>,
-    unknown,
-    unknown,
-    z.infer<typeof careerListQuerySchema>
-  >,
+  req: QueryOf<typeof careerListQuerySchema>,
   res: Response,
 ) {
   const page = req.query.page ?? 1;
@@ -28,7 +29,7 @@ export async function listCareersController(
 }
 
 export async function getCareerBySlugController(
-  req: Request<{ slug: string }>,
+  req: ParamsOf<typeof careerSlugParamsSchema>,
   res: Response,
 ) {
   const career = await getPublicCareerBySlug(req.params.slug);

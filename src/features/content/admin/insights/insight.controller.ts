@@ -1,11 +1,17 @@
-import type { Request, Response } from 'express';
-import { z } from 'zod';
+﻿import type { Response } from 'express';
 
+import {
+  type BodyAndParamsOf,
+  type BodyOf,
+  type ParamsOf,
+  type QueryOf,
+} from '../../../../shared/middlewares/validate.js';
 import { sendMany, sendSuccess } from '../../../../shared/utils/response.js';
 import {
+  adminInsightListQuerySchema,
   createInsightBodySchema,
+  insightIdParamsSchema,
   patchInsightBodySchema,
-  type adminInsightListQuerySchema,
 } from './insight.schema.js';
 import {
   createInsight,
@@ -18,12 +24,7 @@ import {
 } from './insight.service.js';
 
 export async function getAdminInsightsController(
-  req: Request<
-    Record<string, string>,
-    unknown,
-    unknown,
-    z.infer<typeof adminInsightListQuerySchema>
-  >,
+  req: QueryOf<typeof adminInsightListQuerySchema>,
   res: Response,
 ) {
   const page = req.query.page ?? 1;
@@ -48,7 +49,7 @@ export async function getAdminInsightsController(
 }
 
 export async function getAdminInsightController(
-  req: Request<{ id: string }>,
+  req: ParamsOf<typeof insightIdParamsSchema>,
   res: Response,
 ) {
   const insight = await getAdminInsight(req.params.id);
@@ -56,11 +57,7 @@ export async function getAdminInsightController(
 }
 
 export async function createInsightController(
-  req: Request<
-    Record<string, string>,
-    unknown,
-    z.infer<typeof createInsightBodySchema>
-  >,
+  req: BodyOf<typeof createInsightBodySchema>,
   res: Response,
 ) {
   const insight = await createInsight(req.body);
@@ -68,7 +65,10 @@ export async function createInsightController(
 }
 
 export async function updateInsightController(
-  req: Request<{ id: string }, unknown, z.infer<typeof patchInsightBodySchema>>,
+  req: BodyAndParamsOf<
+    typeof patchInsightBodySchema,
+    typeof insightIdParamsSchema
+  >,
   res: Response,
 ) {
   const insight = await updateInsight(req.params.id, req.body);
@@ -76,7 +76,7 @@ export async function updateInsightController(
 }
 
 export async function publishInsightController(
-  req: Request<{ id: string }>,
+  req: ParamsOf<typeof insightIdParamsSchema>,
   res: Response,
 ) {
   const insight = await publishInsight(req.params.id);
@@ -84,7 +84,7 @@ export async function publishInsightController(
 }
 
 export async function unpublishInsightController(
-  req: Request<{ id: string }>,
+  req: ParamsOf<typeof insightIdParamsSchema>,
   res: Response,
 ) {
   const insight = await unpublishInsight(req.params.id);
@@ -92,7 +92,7 @@ export async function unpublishInsightController(
 }
 
 export async function deleteInsightController(
-  req: Request<{ id: string }>,
+  req: ParamsOf<typeof insightIdParamsSchema>,
   res: Response,
 ) {
   await deleteInsight(req.params.id);

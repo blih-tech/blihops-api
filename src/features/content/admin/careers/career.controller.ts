@@ -1,11 +1,17 @@
-import type { Request, Response } from 'express';
-import { z } from 'zod';
+﻿import type { Response } from 'express';
 
+import {
+  type BodyAndParamsOf,
+  type BodyOf,
+  type ParamsOf,
+  type QueryOf,
+} from '../../../../shared/middlewares/validate.js';
 import { sendMany, sendSuccess } from '../../../../shared/utils/response.js';
 import {
+  adminCareerListQuerySchema,
+  careerIdParamsSchema,
   createCareerBodySchema,
   patchCareerBodySchema,
-  type adminCareerListQuerySchema,
 } from './career.schema.js';
 import {
   createCareer,
@@ -16,12 +22,7 @@ import {
 } from './career.service.js';
 
 export async function getAdminCareersController(
-  req: Request<
-    Record<string, string>,
-    unknown,
-    unknown,
-    z.infer<typeof adminCareerListQuerySchema>
-  >,
+  req: QueryOf<typeof adminCareerListQuerySchema>,
   res: Response,
 ) {
   const page = req.query.page ?? 1;
@@ -44,7 +45,7 @@ export async function getAdminCareersController(
 }
 
 export async function getAdminCareerController(
-  req: Request<{ id: string }>,
+  req: ParamsOf<typeof careerIdParamsSchema>,
   res: Response,
 ) {
   const career = await getAdminCareer(req.params.id);
@@ -52,11 +53,7 @@ export async function getAdminCareerController(
 }
 
 export async function createCareerController(
-  req: Request<
-    Record<string, string>,
-    unknown,
-    z.infer<typeof createCareerBodySchema>
-  >,
+  req: BodyOf<typeof createCareerBodySchema>,
   res: Response,
 ) {
   const career = await createCareer(req.body);
@@ -64,7 +61,10 @@ export async function createCareerController(
 }
 
 export async function updateCareerController(
-  req: Request<{ id: string }, unknown, z.infer<typeof patchCareerBodySchema>>,
+  req: BodyAndParamsOf<
+    typeof patchCareerBodySchema,
+    typeof careerIdParamsSchema
+  >,
   res: Response,
 ) {
   const career = await updateCareer(req.params.id, req.body);
@@ -72,7 +72,7 @@ export async function updateCareerController(
 }
 
 export async function deleteCareerController(
-  req: Request<{ id: string }>,
+  req: ParamsOf<typeof careerIdParamsSchema>,
   res: Response,
 ) {
   await deleteCareer(req.params.id);

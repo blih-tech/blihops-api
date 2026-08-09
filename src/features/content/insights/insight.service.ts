@@ -60,10 +60,15 @@ function toInsightListItem(insight: InsightWithRelations): InsightListItem {
         ? null
         : { id: insight.category.id, name: insight.category.name },
     media: insight.media as InsightListItem['media'],
-    tags: insight.tags.map((row) => ({ id: row.tag.id, name: row.tag.name })),
+    tags: insight.tags.map((row) => ({
+      id: row.tag.id,
+      name: row.tag.name,
+    })),
     createdAt: insight.createdAt.toISOString(),
   };
 }
+
+export { toInsightListItem };
 
 export async function listPublicInsights(
   page: number,
