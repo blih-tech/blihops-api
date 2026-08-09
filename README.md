@@ -1,8 +1,8 @@
 # blihops-api
 
 Express backend for blihops. Provides authentication (better-auth email/password
-with admin invites), session token mirroring, and transactional email (Resend)
-for the web and admin frontends.
+with admin invites), session token mirroring, transactional email (Resend), and
+the managed website content API for the web and admin frontends.
 
 ## Stack
 
@@ -10,9 +10,10 @@ for the web and admin frontends.
 - TypeScript (strict)
 - Prisma (ORM, driver adapters)
 - PostgreSQL (Docker for local dev; Neon in production)
-- better-auth (auth: sign-in, invites, password reset)
+- better-auth (auth: sign-in, invites, password reset, role-based access)
 - Resend (transactional email: invite + reset templates with brand logo)
 - zod (validation + OpenAPI)
+- sanitize-html (server-side HTML sanitization of rich-text content)
 - pino (logging)
 - Vitest + supertest + testcontainers (testing)
 - pnpm
@@ -70,6 +71,53 @@ Open http://localhost:4000/health.
 | `pnpm seed:admin`             | Create the initial admin (requires `SEED_ADMIN_PASSWORD`)                                            |
 | `pnpm seed:demo`              | Create demo client + talent users (requires `SEED_DEMO_PASSWORD`)                                    |
 
+## API surface
+
+### Authentication (`/api/v1/auth`)
+
+Sign-in, sign-out, password reset, admin invitations, and session token
+mirroring via better-auth. Admin, Client, and Talent roles are enforced by
+middleware (`requireAuth` + `requireRole`).
+
+### Managed website content (`/api/v1/content`)
+
+Nine resources back the CMS for the web and admin frontends:
+
+| Resource      | Public route(s)                               | Admin routes (`/api/v1/content/admin/...`) |
+| ------------- | --------------------------------------------- | ------------------------------------------ |
+| Tags          | `GET /content/tags`                           | `tags`                                     |
+| Categories    | `GET /content/categories`                     | `categories`                               |
+| Trusted Logos | `GET /content/logos`                          | `logos`                                    |
+| Testimonials  | `GET /content/testimonials`                   | `testimonials`                             |
+| Services hero | `GET /content/services-hero`                  | `services-hero`                            |
+| Case Studies  | `GET /content/case-studies` · `GET .../:slug` | `case-studies` (+ publish/unpublish)       |
+| Insights      | `GET /content/insights` · `GET .../:slug`     | `insights` (+ publish/unpublish)           |
+| Career Roles  | `GET /content/careers` · `GET .../:slug`      | `careers`                                  |
+| Pilot FAQs    | `GET /content/faqs`                           | `faqs`                                     |
+
+Conventions:
+
+- Public routes are unauthenticated GETs returning only published/active
+  content, with cache headers (`public, max-age=300, stale-while-revalidate`).
+- Every admin route lives under the single `/admin` subtree, guarded once by
+  `requireAuth` + `requireRole('admin')`.
+- Single-resource responses use `{ data }`; lists use `{ items, meta }`.
+- Bilingual resources (case studies, insights, FAQs) return both locales; the
+  web selects by its active locale.
+- Rich-text bodies are sanitized server-side with `sanitize-html`.
+- Content-specific error codes: `CONTENT_INCOMPLETE` (422), `CONTENT_SLUG_TAKEN`
+  (409), `CONTENT_PRIMARY_DELETE_BLOCKED` (409), `CONTENT_INVALID_LOCALE` (400).
+
+Detailed API design lives in `blihops-design/03-Engineering/features/content/`.
+
+### OpenAPI / Swagger
+
+An OpenAPI 3.1 document is generated from the registered schemas and paths. In
+non-production environments it is served at:
+
+- Swagger UI: `http://localhost:4000/api/v1/docs`
+- Raw JSON: `http://localhost:4000/api/v1/openapi.json`
+
 ## Production schema changes
 
 Production runs on Render's free tier, which has **no pre-deploy command** — so
@@ -124,17 +172,40 @@ client in `src/generated/` is git-ignored and recreated by `pnpm db:generate`.
 
 ```
 src/
-  app.ts           # Express app instance + routes
-  server.ts        # Entry point - env + listen
+  app.ts                       # Express app instance + route mounting
+  server.ts                    # Entry point - env + listen + graceful shutdown
+  features/
+    auth/                      # Authentication, invitations, session token
+    content/                   # Managed website content feature
+      admin/                   # Auth-guarded admin surface (/api/v1/content/admin)
+        <resource>/            # Per-resource admin module (schema, repository,
+                               #   service, controller, router)
+      common/                  # Shared helpers: sanitization, slug checks,
+                               #   bilingual publish, tag validation, schemas
+      <resource>/              # Per-resource public module + OpenAPI paths
+      paths.ts                 # Aggregates OpenAPI path registrations
+  generated/prisma/            # Generated Prisma client (git-ignored)
+  shared/
+    auth/                      # better-auth instance and config
+    configs/                   # env validation, logger
+    db/                        # Prisma client
+    email/                     # Resend client and templates
+    errors/                    # AppError hierarchy, error codes, envelopes
+    middlewares/               # auth, validate, error handler, CORS, logging
+    openapi/                   # OpenAPI registry, document generation, common helpers
+    utils/                     # Response helpers
+    scripts/                   # Seed scripts
 tests/
-  setup/           # Shared test bootstrap (env, testcontainers global setup, db reset)
-  unit/            # Fast unit tests (no Docker)
-  integration/     # DB-backed tests via testcontainers (Docker)
+  helpers/                     # Shared test helpers (auth sessions)
+  setup/                       # Shared test bootstrap (env, testcontainers global setup, db reset)
+  unit/                        # Fast unit tests (no Docker)
+  integration/
+    content/                   # Per-resource DB-backed tests via testcontainers (Docker)
 .github/
   workflows/ci.yml
   CODEOWNERS
   PULL_REQUEST_TEMPLATE.md
-.husky/            # pre-commit, commit-msg, pre-push hooks
+.husky/                        # pre-commit, commit-msg, pre-push hooks
 ```
 
 ## Contributing
