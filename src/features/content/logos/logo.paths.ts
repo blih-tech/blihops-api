@@ -1,4 +1,8 @@
-import { errorResponse, requestBody } from '../../../shared/openapi/common.js';
+﻿import {
+  errorResponse,
+  registerPublicPath,
+  requestBody,
+} from '../../../shared/openapi/common.js';
 import { registry } from '../../../shared/openapi/registry.js';
 import {
   createLogoBodySchema,
@@ -18,6 +22,8 @@ registry.register('UpdateLogoParams', updateLogoParamsSchema);
 registry.register('UpdateLogoBody', updateLogoBodySchema);
 registry.register('UpdateLogoResponse', updateLogoResponseSchema);
 registry.register('DeleteLogoParams', deleteLogoParamsSchema);
+
+registerPublicPath('/api/v1/content/logos');
 
 const cookieSecurity = [{ apiKeyCookie: [] }];
 

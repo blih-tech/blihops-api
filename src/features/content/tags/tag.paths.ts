@@ -1,4 +1,8 @@
-import { errorResponse, requestBody } from '../../../shared/openapi/common.js';
+﻿import {
+  errorResponse,
+  registerPublicPath,
+  requestBody,
+} from '../../../shared/openapi/common.js';
 import { registry } from '../../../shared/openapi/registry.js';
 import {
   createTagBodySchema,
@@ -18,6 +22,8 @@ registry.register('UpdateTagParams', updateTagParamsSchema);
 registry.register('UpdateTagBody', updateTagBodySchema);
 registry.register('UpdateTagResponse', updateTagResponseSchema);
 registry.register('DeleteTagParams', deleteTagParamsSchema);
+
+registerPublicPath('/api/v1/content/tags');
 
 const cookieSecurity = [{ apiKeyCookie: [] }];
 

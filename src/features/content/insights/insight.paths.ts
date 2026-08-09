@@ -1,4 +1,8 @@
-import { errorResponse, requestBody } from '../../../shared/openapi/common.js';
+﻿import {
+  errorResponse,
+  registerPublicPath,
+  requestBody,
+} from '../../../shared/openapi/common.js';
 import { registry } from '../../../shared/openapi/registry.js';
 import {
   adminInsightListQuerySchema,
@@ -41,6 +45,9 @@ registry.register('InsightIdParams', insightIdParamsSchema);
 registry.register('PatchInsightBody', patchInsightBodySchema);
 registry.register('PatchInsightResponse', patchInsightResponseSchema);
 registry.register('AdminInsightListQuery', adminInsightListQuerySchema);
+
+registerPublicPath('/api/v1/content/insights');
+registerPublicPath('/api/v1/content/insights/{slug}');
 
 const cookieSecurity = [{ apiKeyCookie: [] }];
 

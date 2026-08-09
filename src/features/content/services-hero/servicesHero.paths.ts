@@ -1,4 +1,8 @@
-import { errorResponse, requestBody } from '../../../shared/openapi/common.js';
+﻿import {
+  errorResponse,
+  registerPublicPath,
+  requestBody,
+} from '../../../shared/openapi/common.js';
 import { registry } from '../../../shared/openapi/registry.js';
 import {
   putServicesHeroBodySchema,
@@ -13,6 +17,8 @@ registry.register('ServicesHero', servicesHeroSchema);
 registry.register('GetServicesHeroResponse', getServicesHeroResponseSchema);
 registry.register('PutServicesHeroBody', putServicesHeroBodySchema);
 registry.register('PutServicesHeroResponse', putServicesHeroResponseSchema);
+
+registerPublicPath('/api/v1/content/services-hero');
 
 const cookieSecurity = [{ apiKeyCookie: [] }];
 

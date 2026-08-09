@@ -1,4 +1,8 @@
-import { errorResponse, requestBody } from '../../../shared/openapi/common.js';
+﻿import {
+  errorResponse,
+  registerPublicPath,
+  requestBody,
+} from '../../../shared/openapi/common.js';
 import { registry } from '../../../shared/openapi/registry.js';
 import {
   createFaqBodySchema,
@@ -23,6 +27,8 @@ registry.register('CreateFaqResponse', createFaqResponseSchema);
 registry.register('FaqIdParams', faqIdParamsSchema);
 registry.register('PatchFaqBody', patchFaqBodySchema);
 registry.register('PatchFaqResponse', patchFaqResponseSchema);
+
+registerPublicPath('/api/v1/content/faqs');
 
 const cookieSecurity = [{ apiKeyCookie: [] }];
 

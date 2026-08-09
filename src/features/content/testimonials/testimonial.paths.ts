@@ -1,4 +1,8 @@
-import { errorResponse, requestBody } from '../../../shared/openapi/common.js';
+﻿import {
+  errorResponse,
+  registerPublicPath,
+  requestBody,
+} from '../../../shared/openapi/common.js';
 import { registry } from '../../../shared/openapi/registry.js';
 import {
   createTestimonialBodySchema,
@@ -21,6 +25,8 @@ registry.register('UpdateTestimonialParams', updateTestimonialParamsSchema);
 registry.register('UpdateTestimonialBody', updateTestimonialBodySchema);
 registry.register('UpdateTestimonialResponse', updateTestimonialResponseSchema);
 registry.register('DeleteTestimonialParams', deleteTestimonialParamsSchema);
+
+registerPublicPath('/api/v1/content/testimonials');
 
 const cookieSecurity = [{ apiKeyCookie: [] }];
 

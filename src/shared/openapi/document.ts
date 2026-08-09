@@ -2,6 +2,7 @@ import { OpenApiGeneratorV3 } from '@asteasolutions/zod-to-openapi';
 
 import { auth } from '../auth/auth.js';
 import { env } from '../configs/env.js';
+import { publicPaths, registerPublicPath } from './common.js';
 import { registry } from './registry.js';
 import './auth.paths.js';
 import '../../features/content/paths.js';
@@ -18,26 +19,18 @@ const AUTH_PATHS = new Set([
   '/reset-password/{token}',
 ]);
 
-const PUBLIC_PATHS = new Set([
+const AUTH_PUBLIC_PATHS = [
   '/api/v1/auth/ok',
   '/api/v1/auth/sign-in/email',
   '/api/v1/auth/request-password-reset',
   '/api/v1/auth/reset-password',
   '/api/v1/auth/reset-password/{token}',
   '/api/v1/auth/accept-invite',
-  '/api/v1/content/tags',
-  '/api/v1/content/categories',
-  '/api/v1/content/logos',
-  '/api/v1/content/testimonials',
-  '/api/v1/content/services-hero',
-  '/api/v1/content/case-studies',
-  '/api/v1/content/case-studies/{slug}',
-  '/api/v1/content/insights',
-  '/api/v1/content/insights/{slug}',
-  '/api/v1/content/careers',
-  '/api/v1/content/careers/{slug}',
-  '/api/v1/content/faqs',
-]);
+];
+
+for (const path of AUTH_PUBLIC_PATHS) {
+  registerPublicPath(path);
+}
 
 const COOKIE_SECURITY = [{ apiKeyCookie: [] }];
 const COOKIE_OR_BEARER_SECURITY = [{ apiKeyCookie: [] }, { bearerAuth: [] }];
@@ -83,7 +76,7 @@ export async function generateOpenApiDocument() {
 
   for (const [path, item] of Object.entries(paths)) {
     for (const operation of Object.values(item)) {
-      if (PUBLIC_PATHS.has(path)) {
+      if (publicPaths.has(path)) {
         delete operation.security;
       } else if (path === '/api/v1/auth/invite') {
         operation.security = COOKIE_OR_BEARER_SECURITY;

@@ -1,4 +1,8 @@
-import { errorResponse, requestBody } from '../../../shared/openapi/common.js';
+﻿import {
+  errorResponse,
+  registerPublicPath,
+  requestBody,
+} from '../../../shared/openapi/common.js';
 import { registry } from '../../../shared/openapi/registry.js';
 import {
   adminCaseStudyListQuerySchema,
@@ -44,6 +48,9 @@ registry.register('CaseStudyIdParams', caseStudyIdParamsSchema);
 registry.register('PatchCaseStudyBody', patchCaseStudyBodySchema);
 registry.register('PatchCaseStudyResponse', patchCaseStudyResponseSchema);
 registry.register('AdminCaseStudyListQuery', adminCaseStudyListQuerySchema);
+
+registerPublicPath('/api/v1/content/case-studies');
+registerPublicPath('/api/v1/content/case-studies/{slug}');
 
 const cookieSecurity = [{ apiKeyCookie: [] }];
 
