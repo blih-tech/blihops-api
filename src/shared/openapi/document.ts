@@ -36,6 +36,7 @@ const PUBLIC_PATHS = new Set([
   '/api/v1/content/insights/{slug}',
   '/api/v1/content/careers',
   '/api/v1/content/careers/{slug}',
+  '/api/v1/content/faqs',
 ]);
 
 const COOKIE_SECURITY = [{ apiKeyCookie: [] }];
