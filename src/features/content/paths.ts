@@ -6,3 +6,4 @@ import './services-hero/servicesHero.paths.js';
 import './case-studies/caseStudy.paths.js';
 import './insights/insight.paths.js';
 import './careers/career.paths.js';
+import './faqs/faq.paths.js';
