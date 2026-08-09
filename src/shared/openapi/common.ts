@@ -1,5 +1,11 @@
 import { z } from 'zod';
 
+export const publicPaths = new Set<string>();
+
+export function registerPublicPath(path: string): void {
+  publicPaths.add(path);
+}
+
 export const errorEnvelopeSchema = z.object({
   error: z.object({
     code: z.string(),

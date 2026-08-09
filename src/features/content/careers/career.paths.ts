@@ -1,4 +1,8 @@
-import { errorResponse, requestBody } from '../../../shared/openapi/common.js';
+﻿import {
+  errorResponse,
+  registerPublicPath,
+  requestBody,
+} from '../../../shared/openapi/common.js';
 import { registry } from '../../../shared/openapi/registry.js';
 import {
   adminCareerListQuerySchema,
@@ -29,6 +33,9 @@ registry.register('CareerIdParams', careerIdParamsSchema);
 registry.register('PatchCareerBody', patchCareerBodySchema);
 registry.register('PatchCareerResponse', patchCareerResponseSchema);
 registry.register('AdminCareerListQuery', adminCareerListQuerySchema);
+
+registerPublicPath('/api/v1/content/careers');
+registerPublicPath('/api/v1/content/careers/{slug}');
 
 const cookieSecurity = [{ apiKeyCookie: [] }];
 

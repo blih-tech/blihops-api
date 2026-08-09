@@ -1,4 +1,8 @@
-import { errorResponse, requestBody } from '../../../shared/openapi/common.js';
+﻿import {
+  errorResponse,
+  registerPublicPath,
+  requestBody,
+} from '../../../shared/openapi/common.js';
 import { registry } from '../../../shared/openapi/registry.js';
 import {
   createCategoryBodySchema,
@@ -21,6 +25,8 @@ registry.register('UpdateCategoryParams', updateCategoryParamsSchema);
 registry.register('UpdateCategoryBody', updateCategoryBodySchema);
 registry.register('UpdateCategoryResponse', updateCategoryResponseSchema);
 registry.register('DeleteCategoryParams', deleteCategoryParamsSchema);
+
+registerPublicPath('/api/v1/content/categories');
 
 const cookieSecurity = [{ apiKeyCookie: [] }];
 
