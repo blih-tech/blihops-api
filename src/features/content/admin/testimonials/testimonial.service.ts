@@ -1,6 +1,6 @@
 import { prisma } from '../../../../shared/db/prisma.js';
 import {
-  ConflictError,
+  ContentPrimaryDeleteBlockedError,
   NotFoundError,
 } from '../../../../shared/errors/httpErrors.js';
 import { isRecordNotFound } from '../../common/prismaErrors.js';
@@ -73,7 +73,7 @@ export async function deleteTestimonial(id: string): Promise<void> {
   if (existing === null) {
     throw new NotFoundError('Testimonial not found');
   }
-  throw new ConflictError(
+  throw new ContentPrimaryDeleteBlockedError(
     'The primary testimonial cannot be deleted until another testimonial is set as primary',
   );
 }

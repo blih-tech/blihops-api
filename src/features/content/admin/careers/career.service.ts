@@ -1,5 +1,5 @@
-import {
-  ConflictError,
+﻿import {
+  ContentSlugTakenError,
   NotFoundError,
 } from '../../../../shared/errors/httpErrors.js';
 import {
@@ -75,7 +75,9 @@ export async function createCareer(
 ): Promise<CareerDetail> {
   const existing = await findCareerBySlug(payload.slug);
   if (existing !== null) {
-    throw new ConflictError('A career role with this slug already exists');
+    throw new ContentSlugTakenError(
+      'A career role with this slug already exists',
+    );
   }
 
   try {
@@ -83,7 +85,9 @@ export async function createCareer(
     return toCareerDetail(career);
   } catch (err) {
     if (isUniqueViolation(err)) {
-      throw new ConflictError('A career role with this slug already exists');
+      throw new ContentSlugTakenError(
+        'A career role with this slug already exists',
+      );
     }
     throw err;
   }
@@ -101,7 +105,9 @@ export async function updateCareer(
   if (payload.slug !== undefined) {
     const slugTaken = await findCareerBySlug(payload.slug);
     if (slugTaken !== null && slugTaken.id !== id) {
-      throw new ConflictError('A career role with this slug already exists');
+      throw new ContentSlugTakenError(
+        'A career role with this slug already exists',
+      );
     }
   }
 
@@ -139,7 +145,9 @@ export async function updateCareer(
     return toCareerDetail(career);
   } catch (err) {
     if (isUniqueViolation(err)) {
-      throw new ConflictError('A career role with this slug already exists');
+      throw new ContentSlugTakenError(
+        'A career role with this slug already exists',
+      );
     }
     if (isRecordNotFound(err)) {
       throw new NotFoundError('Career role not found');

@@ -1,4 +1,7 @@
-﻿import { NotFoundError } from '../../../../shared/errors/httpErrors.js';
+﻿import {
+  ContentInvalidLocaleError,
+  NotFoundError,
+} from '../../../../shared/errors/httpErrors.js';
 import { Prisma } from '../../../../generated/prisma/client.js';
 import { publishBilingualRecord } from '../../common/bilingual.js';
 import { isCaseStudySlugTaken } from '../../common/helpers.js';
@@ -151,6 +154,9 @@ export async function updateCaseStudy(
   }
 
   if ('locale' in payload) {
+    if (payload.locale !== 'en' && payload.locale !== 'de') {
+      throw new ContentInvalidLocaleError();
+    }
     const content = existing.content as CaseStudyContent;
     const nextContent: CaseStudyContent = {
       ...content,
