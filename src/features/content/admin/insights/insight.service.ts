@@ -1,12 +1,10 @@
 ﻿import { Prisma } from '../../../../generated/prisma/client.js';
-import {
-  NotFoundError,
-  ValidationError,
-} from '../../../../shared/errors/httpErrors.js';
-import type { ErrorDetail } from '../../../../shared/types/response.js';
+import { NotFoundError } from '../../../../shared/errors/httpErrors.js';
+import { publishBilingualRecord } from '../../common/bilingual.js';
 import { isInsightSlugTaken } from '../../common/helpers.js';
 import { sanitizeRichText } from '../../common/html.js';
 import { isRecordNotFound } from '../../common/prismaErrors.js';
+import { validateTagsExist } from '../../common/tagRepository.js';
 import type {
   InsightContent,
   InsightDetail,
@@ -19,7 +17,6 @@ import {
   deleteInsightRecord,
   findAdminInsights,
   findInsightById,
-  findInsightTagsByIds,
   replaceInsightTags,
   setInsightStatus,
   type InsightRecord,
@@ -69,14 +66,6 @@ function toListItem(insight: InsightRecord): InsightListItem {
   };
 }
 
-async function validateAndSetTags(id: string, tagIds: string[]) {
-  const tags = await findInsightTagsByIds(tagIds);
-  if (tags.length !== tagIds.length) {
-    throw new NotFoundError('One or more tags were not found');
-  }
-  await replaceInsightTags(id, tagIds);
-}
-
 export async function listAdminInsights(params: {
   page: number;
   pageSize: number;
@@ -109,10 +98,7 @@ export async function createInsight(
   payload: CreateInsightPayload,
 ): Promise<InsightDetail> {
   if (payload.tags !== undefined) {
-    const tags = await findInsightTagsByIds(payload.tags);
-    if (tags.length !== payload.tags.length) {
-      throw new NotFoundError('One or more tags were not found');
-    }
+    await validateTagsExist(payload.tags);
   }
 
   const content: InsightContent = {};
@@ -186,7 +172,8 @@ export async function updateInsight(
   }
 
   if (payload.tags !== undefined) {
-    await validateAndSetTags(id, payload.tags);
+    await validateTagsExist(payload.tags);
+    await replaceInsightTags(id, payload.tags);
     const withTags = await findInsightById(id);
     if (withTags !== null) {
       updated = withTags;
@@ -197,66 +184,40 @@ export async function updateInsight(
 }
 
 export async function publishInsight(id: string): Promise<InsightDetail> {
-  const insight = await findInsightById(id);
-  if (insight === null) {
-    throw new NotFoundError('Insight not found');
-  }
-
-  const content = insight.content as InsightContent;
-  const issues: ErrorDetail[] = [];
-
-  for (const locale of ['en', 'de'] as const) {
-    const parsed = fullInsightLocaleContentSchema.safeParse(content[locale]);
-    if (!parsed.success) {
-      for (const issue of parsed.error.issues) {
-        const path = issue.path.join('.');
+  return publishBilingualRecord({
+    id,
+    notFoundMessage: 'Insight not found',
+    findById: findInsightById,
+    contentOf: (insight) => insight.content as InsightContent,
+    fullLocaleSchema: fullInsightLocaleContentSchema,
+    sharedFieldIssues: (insight) => {
+      const issues = [];
+      if (insight.author.trim().length === 0) {
+        issues.push({ path: 'author', message: 'Author is required' });
+      }
+      if (insight.categoryId === null) {
+        issues.push({ path: 'categoryId', message: 'Category is required' });
+      }
+      if (insight.readTimeMinutes === null || insight.readTimeMinutes < 1) {
         issues.push({
-          path: `${locale}.${path}`,
-          message: issue.message,
+          path: 'readTimeMinutes',
+          message: 'Read time must be at least 1 minute',
         });
       }
-    }
-  }
-
-  if (insight.author.trim().length === 0) {
-    issues.push({ path: 'author', message: 'Author is required' });
-  }
-  if (insight.categoryId === null) {
-    issues.push({ path: 'categoryId', message: 'Category is required' });
-  }
-  if (insight.readTimeMinutes === null || insight.readTimeMinutes < 1) {
-    issues.push({
-      path: 'readTimeMinutes',
-      message: 'Read time must be at least 1 minute',
-    });
-  }
-  const media = insight.media as { url?: string } | null;
-  if (
-    media === null ||
-    media.url === undefined ||
-    media.url.trim().length === 0
-  ) {
-    issues.push({ path: 'media.url', message: 'Media URL is required' });
-  }
-
-  if (issues.length === 0) {
-    for (const locale of ['en', 'de'] as const) {
-      const slug = content[locale]?.slug;
-      if (slug !== undefined && (await isInsightSlugTaken(slug, id))) {
-        issues.push({
-          path: `${locale}.slug`,
-          message: 'This slug is already in use by another insight',
-        });
+      const media = insight.media as { url?: string } | null;
+      if (
+        media === null ||
+        media.url === undefined ||
+        media.url.trim().length === 0
+      ) {
+        issues.push({ path: 'media.url', message: 'Media URL is required' });
       }
-    }
-  }
-
-  if (issues.length > 0) {
-    throw new ValidationError('Publish validation failed', issues);
-  }
-
-  const updated = await setInsightStatus(id, 'PUBLISHED');
-  return toInsightDetail(updated);
+      return issues;
+    },
+    isSlugTaken: isInsightSlugTaken,
+    setPublished: (recordId) => setInsightStatus(recordId, 'PUBLISHED'),
+    toDetail: toInsightDetail,
+  });
 }
 
 export async function unpublishInsight(id: string): Promise<InsightDetail> {

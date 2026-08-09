@@ -72,13 +72,6 @@ export function deleteInsightRecord(id: string) {
   return prisma.insight.delete({ where: { id } });
 }
 
-export function findInsightTagsByIds(ids: string[]) {
-  return prisma.tag.findMany({
-    where: { id: { in: ids } },
-    select: { id: true },
-  });
-}
-
 export function replaceInsightTags(insightId: string, tagIds: string[]) {
   return prisma.$transaction([
     prisma.insightTag.deleteMany({ where: { insightId } }),

@@ -1,12 +1,10 @@
-﻿import {
-  NotFoundError,
-  ValidationError,
-} from '../../../../shared/errors/httpErrors.js';
-import type { ErrorDetail } from '../../../../shared/types/response.js';
+﻿import { NotFoundError } from '../../../../shared/errors/httpErrors.js';
 import { Prisma } from '../../../../generated/prisma/client.js';
+import { publishBilingualRecord } from '../../common/bilingual.js';
 import { isCaseStudySlugTaken } from '../../common/helpers.js';
 import { sanitizeRichText } from '../../common/html.js';
 import { isRecordNotFound } from '../../common/prismaErrors.js';
+import { validateTagsExist } from '../../common/tagRepository.js';
 import type {
   CaseStudyContent,
   CaseStudyDetail,
@@ -19,7 +17,6 @@ import {
   deleteCaseStudyRecord,
   findAdminCaseStudies,
   findCaseStudyById,
-  findTagsByIds,
   replaceCaseStudyTags,
   setCaseStudyStatus,
   type CaseStudyRecord,
@@ -79,14 +76,6 @@ function toListItem(caseStudy: CaseStudyRecord): CaseStudyListItem {
   };
 }
 
-async function validateAndSetTags(id: string, tagIds: string[]) {
-  const tags = await findTagsByIds(tagIds);
-  if (tags.length !== tagIds.length) {
-    throw new NotFoundError('One or more tags were not found');
-  }
-  await replaceCaseStudyTags(id, tagIds);
-}
-
 export async function listAdminCaseStudies(params: {
   page: number;
   pageSize: number;
@@ -119,10 +108,7 @@ export async function createCaseStudy(
   payload: CreateCaseStudyPayload,
 ): Promise<CaseStudyDetail> {
   if (payload.tags !== undefined) {
-    const tags = await findTagsByIds(payload.tags);
-    if (tags.length !== payload.tags.length) {
-      throw new NotFoundError('One or more tags were not found');
-    }
+    await validateTagsExist(payload.tags);
   }
 
   const content: CaseStudyContent = {};
@@ -191,7 +177,8 @@ export async function updateCaseStudy(
   }
 
   if (payload.tags !== undefined) {
-    await validateAndSetTags(id, payload.tags);
+    await validateTagsExist(payload.tags);
+    await replaceCaseStudyTags(id, payload.tags);
     const withTags = await findCaseStudyById(id);
     if (withTags !== null) {
       updated = withTags;
@@ -202,60 +189,34 @@ export async function updateCaseStudy(
 }
 
 export async function publishCaseStudy(id: string): Promise<CaseStudyDetail> {
-  const caseStudy = await findCaseStudyById(id);
-  if (caseStudy === null) {
-    throw new NotFoundError('Case study not found');
-  }
-
-  const content = caseStudy.content as CaseStudyContent;
-  const issues: ErrorDetail[] = [];
-
-  for (const locale of ['en', 'de'] as const) {
-    const parsed = fullLocaleContentSchema.safeParse(content[locale]);
-    if (!parsed.success) {
-      for (const issue of parsed.error.issues) {
-        const path = issue.path.join('.');
-        issues.push({
-          path: `${locale}.${path}`,
-          message: issue.message,
-        });
+  return publishBilingualRecord({
+    id,
+    notFoundMessage: 'Case study not found',
+    findById: findCaseStudyById,
+    contentOf: (caseStudy) => caseStudy.content as CaseStudyContent,
+    fullLocaleSchema: fullLocaleContentSchema,
+    sharedFieldIssues: (caseStudy) => {
+      const issues = [];
+      if (caseStudy.client.trim().length === 0) {
+        issues.push({ path: 'client', message: 'Client is required' });
       }
-    }
-  }
-
-  if (caseStudy.client.trim().length === 0) {
-    issues.push({ path: 'client', message: 'Client is required' });
-  }
-  if (caseStudy.categoryId === null) {
-    issues.push({ path: 'categoryId', message: 'Category is required' });
-  }
-  const media = caseStudy.media as { url?: string } | null;
-  if (
-    media === null ||
-    media.url === undefined ||
-    media.url.trim().length === 0
-  ) {
-    issues.push({ path: 'media.url', message: 'Media URL is required' });
-  }
-
-  if (issues.length === 0) {
-    for (const locale of ['en', 'de'] as const) {
-      const slug = content[locale]?.slug;
-      if (slug !== undefined && (await isCaseStudySlugTaken(slug, id))) {
-        issues.push({
-          path: `${locale}.slug`,
-          message: 'This slug is already in use by another case study',
-        });
+      if (caseStudy.categoryId === null) {
+        issues.push({ path: 'categoryId', message: 'Category is required' });
       }
-    }
-  }
-
-  if (issues.length > 0) {
-    throw new ValidationError('Publish validation failed', issues);
-  }
-
-  const updated = await setCaseStudyStatus(id, 'PUBLISHED');
-  return toCaseStudyDetail(updated);
+      const media = caseStudy.media as { url?: string } | null;
+      if (
+        media === null ||
+        media.url === undefined ||
+        media.url.trim().length === 0
+      ) {
+        issues.push({ path: 'media.url', message: 'Media URL is required' });
+      }
+      return issues;
+    },
+    isSlugTaken: isCaseStudySlugTaken,
+    setPublished: (recordId) => setCaseStudyStatus(recordId, 'PUBLISHED'),
+    toDetail: toCaseStudyDetail,
+  });
 }
 
 export async function unpublishCaseStudy(id: string): Promise<CaseStudyDetail> {
