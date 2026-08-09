@@ -95,7 +95,7 @@ const sharedFieldsPatchSchema = z.strictObject({
 });
 
 const localePatchSchema = z.strictObject({
-  locale: z.enum(['en', 'de']),
+  locale: z.string().min(1).max(2).describe('Locale to replace: en or de'),
   content: partialLocaleContentSchema,
 });
 

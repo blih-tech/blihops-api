@@ -63,6 +63,43 @@ export class TooManyRequestsError extends AppError {
   }
 }
 
+export class ContentIncompleteError extends AppError {
+  constructor(message: string, details: ErrorDetail[]) {
+    super(message, {
+      code: ErrorCodes.CONTENT_INCOMPLETE,
+      statusCode: 422,
+      details,
+    });
+  }
+}
+
+export class ContentSlugTakenError extends AppError {
+  constructor(message = 'This slug is already in use') {
+    super(message, {
+      code: ErrorCodes.CONTENT_SLUG_TAKEN,
+      statusCode: 409,
+    });
+  }
+}
+
+export class ContentPrimaryDeleteBlockedError extends AppError {
+  constructor(message: string) {
+    super(message, {
+      code: ErrorCodes.CONTENT_PRIMARY_DELETE_BLOCKED,
+      statusCode: 409,
+    });
+  }
+}
+
+export class ContentInvalidLocaleError extends AppError {
+  constructor(message = 'Locale must be either en or de') {
+    super(message, {
+      code: ErrorCodes.CONTENT_INVALID_LOCALE,
+      statusCode: 400,
+    });
+  }
+}
+
 export class InternalServerError extends AppError {
   constructor(message = 'Internal server error') {
     super(message, {

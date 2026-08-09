@@ -1,4 +1,4 @@
-import request from 'supertest';
+﻿import request from 'supertest';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 import { app } from '../../../src/app.js';
@@ -307,7 +307,7 @@ describe('career roles resource', () => {
         .send(careerData)
         .expect(409);
 
-      expect(asError(res.body).error.code).toBe('CONFLICT');
+      expect(asError(res.body).error.code).toBe('CONTENT_SLUG_TAKEN');
     });
 
     it('returns 401 without a session', async () => {
@@ -374,7 +374,7 @@ describe('career roles resource', () => {
         .send({ slug: 'second-role' })
         .expect(409);
 
-      expect(asError(res.body).error.code).toBe('CONFLICT');
+      expect(asError(res.body).error.code).toBe('CONTENT_SLUG_TAKEN');
     });
 
     it('returns 404 for an unknown id', async () => {

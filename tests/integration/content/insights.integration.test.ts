@@ -487,10 +487,9 @@ describe('insights resource', () => {
         content: candidateContent,
       });
 
-      const res = await publishViaApi(candidate.id).expect(422);
+      const res = await publishViaApi(candidate.id).expect(409);
 
-      const details = asError(res.body).error.details ?? [];
-      expect(details.map((detail) => detail.path)).toContain('en.slug');
+      expect(asError(res.body).error.code).toBe('CONTENT_SLUG_TAKEN');
     });
 
     it('unpublishes an insight and hides it from the public', async () => {

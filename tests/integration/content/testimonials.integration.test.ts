@@ -263,7 +263,9 @@ describe('testimonials resource', () => {
         .set('cookie', adminCookie)
         .expect(409);
 
-      expect(asError(res.body).error.code).toBe('CONFLICT');
+      expect(asError(res.body).error.code).toBe(
+        'CONTENT_PRIMARY_DELETE_BLOCKED',
+      );
       await expect(prisma.testimonial.count()).resolves.toBe(1);
     });
 

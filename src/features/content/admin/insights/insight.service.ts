@@ -1,5 +1,8 @@
 ﻿import { Prisma } from '../../../../generated/prisma/client.js';
-import { NotFoundError } from '../../../../shared/errors/httpErrors.js';
+import {
+  ContentInvalidLocaleError,
+  NotFoundError,
+} from '../../../../shared/errors/httpErrors.js';
 import { publishBilingualRecord } from '../../common/bilingual.js';
 import { isInsightSlugTaken } from '../../common/helpers.js';
 import { sanitizeRichText } from '../../common/html.js';
@@ -142,6 +145,9 @@ export async function updateInsight(
   }
 
   if ('locale' in payload) {
+    if (payload.locale !== 'en' && payload.locale !== 'de') {
+      throw new ContentInvalidLocaleError();
+    }
     const content = existing.content as InsightContent;
     const nextContent: InsightContent = {
       ...content,

@@ -1,8 +1,9 @@
 import type { z } from 'zod';
 
 import {
+  ContentIncompleteError,
+  ContentSlugTakenError,
   NotFoundError,
-  ValidationError,
 } from '../../../shared/errors/httpErrors.js';
 import type { ErrorDetail } from '../../../shared/types/response.js';
 
@@ -26,6 +27,7 @@ export async function publishBilingualRecord<TRecord, TDetail>(params: {
 
   const content = params.contentOf(record);
   const issues: ErrorDetail[] = [];
+  const slugIssues: ErrorDetail[] = [];
 
   for (const locale of ['en', 'de'] as const) {
     const parsed = params.fullLocaleSchema.safeParse(content[locale]);
@@ -47,7 +49,7 @@ export async function publishBilingualRecord<TRecord, TDetail>(params: {
       const localeContent = content[locale] as { slug?: string } | undefined;
       const slug = localeContent?.slug;
       if (slug !== undefined && (await params.isSlugTaken(slug, params.id))) {
-        issues.push({
+        slugIssues.push({
           path: `${locale}.slug`,
           message: 'This slug is already in use by another record',
         });
@@ -56,7 +58,10 @@ export async function publishBilingualRecord<TRecord, TDetail>(params: {
   }
 
   if (issues.length > 0) {
-    throw new ValidationError('Publish validation failed', issues);
+    throw new ContentIncompleteError('Publish validation failed', issues);
+  }
+  if (slugIssues.length > 0) {
+    throw new ContentSlugTakenError();
   }
 
   const updated = await params.setPublished(params.id);

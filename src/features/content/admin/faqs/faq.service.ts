@@ -1,7 +1,7 @@
 import { Prisma } from '../../../../generated/prisma/client.js';
 import {
+  ContentIncompleteError,
   NotFoundError,
-  ValidationError,
 } from '../../../../shared/errors/httpErrors.js';
 import type { ErrorDetail } from '../../../../shared/types/response.js';
 import { sanitizeRichText } from '../../common/html.js';
@@ -111,7 +111,7 @@ export async function updateFaq(
         : nextContent;
     const issues = validateLocaleCompleteness(contentToValidate);
     if (issues.length > 0) {
-      throw new ValidationError('Activation validation failed', issues);
+      throw new ContentIncompleteError('Activation validation failed', issues);
     }
   }
 
