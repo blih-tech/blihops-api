@@ -1,11 +1,17 @@
-import type { Request, Response } from 'express';
-import { z } from 'zod';
+﻿import type { Response } from 'express';
 
+import {
+  type BodyAndParamsOf,
+  type BodyOf,
+  type ParamsOf,
+  type QueryOf,
+} from '../../../../shared/middlewares/validate.js';
 import { sendMany, sendSuccess } from '../../../../shared/utils/response.js';
 import {
+  adminCaseStudyListQuerySchema,
+  caseStudyIdParamsSchema,
   createCaseStudyBodySchema,
   patchCaseStudyBodySchema,
-  type adminCaseStudyListQuerySchema,
 } from './caseStudy.schema.js';
 import {
   createCaseStudy,
@@ -18,12 +24,7 @@ import {
 } from './caseStudy.service.js';
 
 export async function getAdminCaseStudiesController(
-  req: Request<
-    Record<string, string>,
-    unknown,
-    unknown,
-    z.infer<typeof adminCaseStudyListQuerySchema>
-  >,
+  req: QueryOf<typeof adminCaseStudyListQuerySchema>,
   res: Response,
 ) {
   const page = req.query.page ?? 1;
@@ -48,7 +49,7 @@ export async function getAdminCaseStudiesController(
 }
 
 export async function getAdminCaseStudyController(
-  req: Request<{ id: string }>,
+  req: ParamsOf<typeof caseStudyIdParamsSchema>,
   res: Response,
 ) {
   const caseStudy = await getAdminCaseStudy(req.params.id);
@@ -56,11 +57,7 @@ export async function getAdminCaseStudyController(
 }
 
 export async function createCaseStudyController(
-  req: Request<
-    Record<string, string>,
-    unknown,
-    z.infer<typeof createCaseStudyBodySchema>
-  >,
+  req: BodyOf<typeof createCaseStudyBodySchema>,
   res: Response,
 ) {
   const caseStudy = await createCaseStudy(req.body);
@@ -68,10 +65,9 @@ export async function createCaseStudyController(
 }
 
 export async function updateCaseStudyController(
-  req: Request<
-    { id: string },
-    unknown,
-    z.infer<typeof patchCaseStudyBodySchema>
+  req: BodyAndParamsOf<
+    typeof patchCaseStudyBodySchema,
+    typeof caseStudyIdParamsSchema
   >,
   res: Response,
 ) {
@@ -80,7 +76,7 @@ export async function updateCaseStudyController(
 }
 
 export async function publishCaseStudyController(
-  req: Request<{ id: string }>,
+  req: ParamsOf<typeof caseStudyIdParamsSchema>,
   res: Response,
 ) {
   const caseStudy = await publishCaseStudy(req.params.id);
@@ -88,7 +84,7 @@ export async function publishCaseStudyController(
 }
 
 export async function unpublishCaseStudyController(
-  req: Request<{ id: string }>,
+  req: ParamsOf<typeof caseStudyIdParamsSchema>,
   res: Response,
 ) {
   const caseStudy = await unpublishCaseStudy(req.params.id);
@@ -96,7 +92,7 @@ export async function unpublishCaseStudyController(
 }
 
 export async function deleteCaseStudyController(
-  req: Request<{ id: string }>,
+  req: ParamsOf<typeof caseStudyIdParamsSchema>,
   res: Response,
 ) {
   await deleteCaseStudy(req.params.id);

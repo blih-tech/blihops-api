@@ -71,6 +71,8 @@ function toCaseStudyListItem(
   };
 }
 
+export { toCaseStudyListItem };
+
 export async function listPublicCaseStudies(
   page: number,
   pageSize: number,

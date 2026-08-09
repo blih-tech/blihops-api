@@ -1,21 +1,22 @@
-import type { Request, Response } from 'express';
-import { z } from 'zod';
+import type { Response } from 'express';
 
+import {
+  type ParamsOf,
+  type QueryOf,
+} from '../../../shared/middlewares/validate.js';
 import { setPublicCache } from '../common/cache.js';
 import { sendMany, sendSuccess } from '../../../shared/utils/response.js';
-import type { insightListQuerySchema } from './insight.schema.js';
+import {
+  insightListQuerySchema,
+  insightSlugParamsSchema,
+} from './insight.schema.js';
 import {
   getPublicInsightBySlug,
   listPublicInsights,
 } from './insight.service.js';
 
 export async function listInsightsController(
-  req: Request<
-    Record<string, string>,
-    unknown,
-    unknown,
-    z.infer<typeof insightListQuerySchema>
-  >,
+  req: QueryOf<typeof insightListQuerySchema>,
   res: Response,
 ) {
   const page = req.query.page ?? 1;
@@ -31,7 +32,7 @@ export async function listInsightsController(
 }
 
 export async function getInsightBySlugController(
-  req: Request<{ slug: string }>,
+  req: ParamsOf<typeof insightSlugParamsSchema>,
   res: Response,
 ) {
   const insight = await getPublicInsightBySlug(req.params.slug);

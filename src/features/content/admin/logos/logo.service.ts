@@ -10,7 +10,10 @@ import {
 } from './logo.repository.js';
 
 export type CreateLogoPayload = { imageUrl: string; alt: string };
-export type UpdateLogoPayload = { imageUrl?: string; alt?: string };
+export type UpdateLogoPayload = {
+  imageUrl?: string | undefined;
+  alt?: string | undefined;
+};
 
 export async function createLogo(
   payload: CreateLogoPayload,
