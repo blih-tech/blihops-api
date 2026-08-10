@@ -9,6 +9,7 @@ import {
   caseStudyIdParamsSchema,
   createCaseStudyBodySchema,
   createCaseStudyResponseSchema,
+  getAdminCaseStudiesResponseSchema,
   getCaseStudyDetailResponseSchema,
   getCaseStudiesResponseSchema,
   patchCaseStudyBodySchema,
@@ -109,7 +110,9 @@ registry.registerPath({
     200: {
       description: 'Case studies list',
       content: {
-        'application/json': { schema: getCaseStudiesResponseSchema },
+        'application/json': {
+          schema: getAdminCaseStudiesResponseSchema,
+        },
       },
     },
     401: errorResponse('Authentication required'),

@@ -11,7 +11,6 @@ import { validateTagsExist } from '../../common/tagRepository.js';
 import type {
   CaseStudyContent,
   CaseStudyDetail,
-  CaseStudyListItem,
   CaseStudyLocaleContent,
 } from '../../case-studies/caseStudy.schema.js';
 import {
@@ -30,6 +29,7 @@ import {
 } from './caseStudy.repository.js';
 import {
   fullLocaleContentSchema,
+  type AdminCaseStudyListItem,
   type CreateCaseStudyPayload,
   type PartialLocaleContent,
   type PatchCaseStudyPayload,
@@ -61,8 +61,11 @@ function sanitizePartialContent(
   };
 }
 
-function toListItem(caseStudy: CaseStudyRecord): CaseStudyListItem {
-  return toCaseStudyListItem(caseStudy);
+function toListItem(caseStudy: CaseStudyRecord): AdminCaseStudyListItem {
+  return {
+    ...toCaseStudyListItem(caseStudy),
+    status: caseStudy.status,
+  };
 }
 
 export async function listAdminCaseStudies(params: {
@@ -70,7 +73,7 @@ export async function listAdminCaseStudies(params: {
   pageSize: number;
   status?: 'DRAFT' | 'PUBLISHED';
   categoryId?: string;
-}): Promise<{ items: CaseStudyListItem[]; total: number }> {
+}): Promise<{ items: AdminCaseStudyListItem[]; total: number }> {
   const where = {
     ...(params.status !== undefined ? { status: params.status } : {}),
     ...(params.categoryId !== undefined

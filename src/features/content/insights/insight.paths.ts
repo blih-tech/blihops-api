@@ -8,6 +8,7 @@ import {
   adminInsightListQuerySchema,
   createInsightBodySchema,
   createInsightResponseSchema,
+  getAdminInsightsResponseSchema,
   getInsightDetailResponseSchema,
   getInsightsResponseSchema,
   insightIdParamsSchema,
@@ -103,7 +104,9 @@ registry.registerPath({
   responses: {
     200: {
       description: 'Insights list',
-      content: { 'application/json': { schema: getInsightsResponseSchema } },
+      content: {
+        'application/json': { schema: getAdminInsightsResponseSchema },
+      },
     },
     401: errorResponse('Authentication required'),
     403: errorResponse('Insufficient permissions'),
