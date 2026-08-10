@@ -3,10 +3,12 @@ import { z } from 'zod';
 
 import {
   idParamSchema,
+  metaSchema,
   pageQuerySchema,
   slugSchema,
 } from '../../common/schemas.js';
 import {
+  careerListItemSchema,
   careersSchema,
   getCareerDetailResponseSchema,
   getCareersResponseSchema,
@@ -15,6 +17,17 @@ import {
 extendZodWithOpenApi(z);
 
 export { getCareerDetailResponseSchema, getCareersResponseSchema };
+
+export const adminCareerListItemSchema = careerListItemSchema.extend({
+  isActive: z.boolean(),
+});
+
+export const getAdminCareersResponseSchema = z.object({
+  items: z.array(adminCareerListItemSchema),
+  meta: metaSchema,
+});
+
+export type AdminCareerListItem = z.infer<typeof adminCareerListItemSchema>;
 
 export const careerIdParamsSchema = z.object({
   id: idParamSchema,
