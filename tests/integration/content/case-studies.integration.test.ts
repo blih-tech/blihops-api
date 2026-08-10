@@ -39,6 +39,7 @@ type ListItem = {
   slugs: { en: string; de: string };
   titles: { en: string; de: string };
   client: string;
+  status?: 'DRAFT' | 'PUBLISHED';
   createdAt: string;
 };
 
@@ -141,6 +142,7 @@ describe('case studies resource', () => {
       const items = asList(res.body).items;
       expect(items).toHaveLength(1);
       expect(items[0]?.slugs.en).toBe('published-one-en');
+      expect(items[0]).not.toHaveProperty('status');
     });
 
     it('returns published case studies newest first', async () => {
@@ -273,6 +275,13 @@ describe('case studies resource', () => {
       const items = asList(res.body).items;
       expect(items).toHaveLength(1);
       expect(items[0]?.slugs.en).toBe('draft-one-en');
+      expect(items[0]?.status).toBe('DRAFT');
+
+      const publishedRes = await request(app)
+        .get('/api/v1/content/admin/case-studies?status=PUBLISHED')
+        .set('cookie', adminCookie)
+        .expect(200);
+      expect(asList(publishedRes.body).items[0]?.status).toBe('PUBLISHED');
     });
 
     it('filters by categoryId', async () => {

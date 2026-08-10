@@ -4,18 +4,31 @@ import { z } from 'zod';
 import {
   idParamSchema,
   mediaSchema,
+  metaSchema,
   pageQuerySchema,
   slugSchema,
 } from '../../common/schemas.js';
 import {
   getInsightDetailResponseSchema,
   getInsightsResponseSchema,
+  insightListItemSchema,
   insightsSchema,
 } from '../../insights/insight.schema.js';
 
 extendZodWithOpenApi(z);
 
 export { getInsightDetailResponseSchema, getInsightsResponseSchema };
+
+export const adminInsightListItemSchema = insightListItemSchema.extend({
+  status: z.enum(['DRAFT', 'PUBLISHED']),
+});
+
+export const getAdminInsightsResponseSchema = z.object({
+  items: z.array(adminInsightListItemSchema),
+  meta: metaSchema,
+});
+
+export type AdminInsightListItem = z.infer<typeof adminInsightListItemSchema>;
 
 export const insightIdParamsSchema = z.object({
   id: idParamSchema,

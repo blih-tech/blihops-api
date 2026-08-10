@@ -37,6 +37,7 @@ type ListItem = {
   slugs: { en: string; de: string };
   titles: { en: string; de: string };
   author: string;
+  status?: 'DRAFT' | 'PUBLISHED';
   createdAt: string;
 };
 
@@ -143,6 +144,7 @@ describe('insights resource', () => {
       const items = asList(res.body).items;
       expect(items).toHaveLength(1);
       expect(items[0]?.slugs.en).toBe('published-one-en');
+      expect(items[0]).not.toHaveProperty('status');
     });
 
     it('returns published insights newest first', async () => {
@@ -274,6 +276,13 @@ describe('insights resource', () => {
       const items = asList(res.body).items;
       expect(items).toHaveLength(1);
       expect(items[0]?.slugs.en).toBe('draft-one-en');
+      expect(items[0]?.status).toBe('DRAFT');
+
+      const publishedRes = await request(app)
+        .get('/api/v1/content/admin/insights?status=PUBLISHED')
+        .set('cookie', adminCookie)
+        .expect(200);
+      expect(asList(publishedRes.body).items[0]?.status).toBe('PUBLISHED');
     });
 
     it('filters by categoryId', async () => {

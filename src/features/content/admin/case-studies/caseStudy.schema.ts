@@ -4,12 +4,14 @@ import { z } from 'zod';
 import {
   idParamSchema,
   mediaSchema,
+  metaSchema,
   pageQuerySchema,
   slugSchema,
 } from '../../common/schemas.js';
 import {
   caseStudyCategorySchema,
   caseStudiesSchema,
+  caseStudyListItemSchema,
   getCaseStudyDetailResponseSchema,
   getCaseStudiesResponseSchema,
 } from '../../case-studies/caseStudy.schema.js';
@@ -17,6 +19,19 @@ import {
 extendZodWithOpenApi(z);
 
 export { getCaseStudyDetailResponseSchema, getCaseStudiesResponseSchema };
+
+export const adminCaseStudyListItemSchema = caseStudyListItemSchema.extend({
+  status: z.enum(['DRAFT', 'PUBLISHED']),
+});
+
+export const getAdminCaseStudiesResponseSchema = z.object({
+  items: z.array(adminCaseStudyListItemSchema),
+  meta: metaSchema,
+});
+
+export type AdminCaseStudyListItem = z.infer<
+  typeof adminCaseStudyListItemSchema
+>;
 
 export const caseStudyIdParamsSchema = z.object({
   id: idParamSchema,

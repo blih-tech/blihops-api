@@ -11,7 +11,6 @@ import { validateTagsExist } from '../../common/tagRepository.js';
 import type {
   InsightContent,
   InsightDetail,
-  InsightListItem,
   InsightLocaleContent,
 } from '../../insights/insight.schema.js';
 import {
@@ -30,6 +29,7 @@ import {
 } from './insight.repository.js';
 import {
   fullInsightLocaleContentSchema,
+  type AdminInsightListItem,
   type CreateInsightPayload,
   type PartialInsightLocaleContent,
   type PatchInsightPayload,
@@ -50,8 +50,11 @@ function sanitizePartialContent(
   };
 }
 
-function toListItem(insight: InsightRecord): InsightListItem {
-  return toInsightListItem(insight);
+function toListItem(insight: InsightRecord): AdminInsightListItem {
+  return {
+    ...toInsightListItem(insight),
+    status: insight.status,
+  };
 }
 
 export async function listAdminInsights(params: {
@@ -59,7 +62,7 @@ export async function listAdminInsights(params: {
   pageSize: number;
   status?: 'DRAFT' | 'PUBLISHED';
   categoryId?: string;
-}): Promise<{ items: InsightListItem[]; total: number }> {
+}): Promise<{ items: AdminInsightListItem[]; total: number }> {
   const where = {
     ...(params.status !== undefined ? { status: params.status } : {}),
     ...(params.categoryId !== undefined
