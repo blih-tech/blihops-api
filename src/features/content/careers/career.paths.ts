@@ -9,6 +9,7 @@ import {
   careerIdParamsSchema,
   createCareerBodySchema,
   createCareerResponseSchema,
+  getAdminCareersResponseSchema,
   getCareerDetailResponseSchema,
   getCareersResponseSchema,
   patchCareerBodySchema,
@@ -90,7 +91,9 @@ registry.registerPath({
   responses: {
     200: {
       description: 'Career roles list',
-      content: { 'application/json': { schema: getCareersResponseSchema } },
+      content: {
+        'application/json': { schema: getAdminCareersResponseSchema },
+      },
     },
     401: errorResponse('Authentication required'),
     403: errorResponse('Insufficient permissions'),

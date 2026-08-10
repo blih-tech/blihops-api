@@ -6,10 +6,7 @@ import {
   isRecordNotFound,
   isUniqueViolation,
 } from '../../common/prismaErrors.js';
-import type {
-  CareerDetail,
-  CareerListItem,
-} from '../../careers/career.schema.js';
+import type { CareerDetail } from '../../careers/career.schema.js';
 import { toCareerDetail } from '../../careers/career.service.js';
 import {
   createCareerRecord,
@@ -20,6 +17,7 @@ import {
   updateCareerRecord,
 } from './career.repository.js';
 import type {
+  AdminCareerListItem,
   CreateCareerPayload,
   PatchCareerPayload,
 } from './career.schema.js';
@@ -32,8 +30,9 @@ function toListItem(career: {
   location: string;
   employmentType: string;
   summary: string;
+  isActive: boolean;
   createdAt: Date;
-}): CareerListItem {
+}): AdminCareerListItem {
   return {
     id: career.id,
     title: career.title,
@@ -42,6 +41,7 @@ function toListItem(career: {
     location: career.location,
     employmentType: career.employmentType,
     summary: career.summary,
+    isActive: career.isActive,
     createdAt: career.createdAt.toISOString(),
   };
 }
@@ -50,7 +50,7 @@ export async function listAdminCareers(params: {
   page: number;
   pageSize: number;
   isActive?: boolean;
-}): Promise<{ items: CareerListItem[]; total: number }> {
+}): Promise<{ items: AdminCareerListItem[]; total: number }> {
   const where = {
     ...(params.isActive !== undefined ? { isActive: params.isActive } : {}),
   };

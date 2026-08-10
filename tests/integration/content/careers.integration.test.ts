@@ -28,6 +28,7 @@ type ListItem = {
   location: string;
   employmentType: string;
   summary: string;
+  isActive?: boolean;
   createdAt: string;
 };
 
@@ -212,6 +213,14 @@ describe('career roles resource', () => {
         .expect(200);
 
       expect(asList(res.body).items).toHaveLength(2);
+      const active = asList(res.body).items.find(
+        (item) => item.slug === 'active-role',
+      );
+      const inactive = asList(res.body).items.find(
+        (item) => item.slug === 'inactive-role',
+      );
+      expect(active?.isActive).toBe(true);
+      expect(inactive?.isActive).toBe(false);
     });
 
     it('filters by isActive', async () => {
@@ -226,6 +235,7 @@ describe('career roles resource', () => {
       const items = asList(res.body).items;
       expect(items).toHaveLength(1);
       expect(items[0]?.slug).toBe('inactive-role');
+      expect(items[0]?.isActive).toBe(false);
     });
   });
 
