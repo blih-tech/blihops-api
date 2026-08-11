@@ -51,9 +51,28 @@ function sanitizePartialContent(
 }
 
 function toListItem(insight: InsightRecord): AdminInsightListItem {
+  const content = insight.content as InsightContent;
+  const isBodyComplete = (locale: keyof InsightContent): boolean => {
+    const body = content[locale]?.body;
+    return Boolean(
+      Array.isArray(body) &&
+      body.length > 0 &&
+      body.every(
+        (section) =>
+          typeof section.section === 'string' &&
+          section.section.trim().length > 0 &&
+          typeof section.content === 'string' &&
+          section.content.trim().length > 0,
+      ),
+    );
+  };
   return {
     ...toInsightListItem(insight),
     status: insight.status,
+    bodyComplete: {
+      en: isBodyComplete('en'),
+      de: isBodyComplete('de'),
+    },
   };
 }
 
@@ -158,7 +177,10 @@ export async function updateInsight(
   if (payload.readTimeMinutes !== undefined) {
     data.readTimeMinutes = payload.readTimeMinutes;
   }
-  if (payload.media !== undefined) data.media = payload.media;
+  if (payload.media !== undefined) {
+    data.media =
+      payload.media === null ? { type: 'image', url: '' } : payload.media;
+  }
 
   let updated: InsightRecord = existing;
   if (Object.keys(data).length > 0) {

@@ -62,9 +62,26 @@ function sanitizePartialContent(
 }
 
 function toListItem(caseStudy: CaseStudyRecord): AdminCaseStudyListItem {
+  const content = caseStudy.content as CaseStudyContent;
+  const isBodyComplete = (locale: keyof CaseStudyContent): boolean => {
+    const body = content[locale]?.body;
+    return Boolean(
+      body &&
+      typeof body.challenge === 'string' &&
+      body.challenge.trim().length > 0 &&
+      typeof body.approach === 'string' &&
+      body.approach.trim().length > 0 &&
+      typeof body.outcome === 'string' &&
+      body.outcome.trim().length > 0,
+    );
+  };
   return {
     ...toCaseStudyListItem(caseStudy),
     status: caseStudy.status,
+    bodyComplete: {
+      en: isBodyComplete('en'),
+      de: isBodyComplete('de'),
+    },
   };
 }
 
@@ -164,7 +181,10 @@ export async function updateCaseStudy(
   } = {};
   if (payload.client !== undefined) data.client = payload.client;
   if (payload.categoryId !== undefined) data.categoryId = payload.categoryId;
-  if (payload.media !== undefined) data.media = payload.media;
+  if (payload.media !== undefined) {
+    data.media =
+      payload.media === null ? { type: 'image', url: '' } : payload.media;
+  }
 
   let updated: CaseStudyRecord = existing;
   if (Object.keys(data).length > 0) {
