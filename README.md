@@ -1,8 +1,15 @@
 # blihops-api
 
-Express backend for blihops. Provides authentication (better-auth email/password
-with admin invites), session token mirroring, transactional email (Resend), and
-the managed website content API for the web and admin frontends.
+Express backend for BlihOps — the outsourcing platform connecting global
+companies with pre-vetted Ethiopian software engineers. Provides
+authentication (better-auth email/password with admin invites), session token
+mirroring, transactional email (Resend), and the managed website content API
+used by the public web and admin frontends.
+
+Product and engineering context lives in
+[`blihops-design`](https://github.com/blih-tech/blihops-design); the content
+feature design is in `blihops-design/03-Engineering/features/content/` and the
+deployment runbook in `blihops-design/03-Engineering/Deployment.md`.
 
 ## Stack
 
@@ -28,7 +35,7 @@ the managed website content API for the web and admin frontends.
 ## Setup
 
 ```bash
-git clone https://github.com/blihops/blihops-api.git
+git clone https://github.com/blih-tech/blihops-api.git
 cd blihops-api
 
 npm install --global corepack@latest
@@ -105,8 +112,9 @@ Conventions:
 - Bilingual resources (case studies, insights, FAQs) return both locales; the
   web selects by its active locale.
 - Rich-text bodies are sanitized server-side with `sanitize-html`.
-- Content-specific error codes: `CONTENT_INCOMPLETE` (422), `CONTENT_SLUG_TAKEN`
-  (409), `CONTENT_PRIMARY_DELETE_BLOCKED` (409), `CONTENT_INVALID_LOCALE` (400).
+- Content-specific error codes: `CONTENT_INCOMPLETE` (422),
+  `CONTENT_SLUG_TAKEN` (409), `CONTENT_PRIMARY_DELETE_BLOCKED` (409),
+  `CONTENT_INVALID_LOCALE` (400).
 
 Detailed API design lives in `blihops-design/03-Engineering/features/content/`.
 
@@ -145,7 +153,8 @@ Notes:
 ## Environment
 
 Copy `.env.example` to `.env` and fill in real values. Never commit `.env` or
-any other `.env*` file.
+any other `.env*` file. The schema in `src/shared/configs/envSchema.ts` is the
+source of truth.
 
 | Variable              | Description                                                            |
 | --------------------- | ---------------------------------------------------------------------- |
@@ -207,6 +216,22 @@ tests/
   PULL_REQUEST_TEMPLATE.md
 .husky/                        # pre-commit, commit-msg, pre-push hooks
 ```
+
+## Deployment
+
+Production runs on Render (API) with Neon (Postgres); the frontends are on
+Vercel. The complete architecture, env matrix, migration procedure, and
+rollout checklist are documented in
+[`blihops-design/03-Engineering/Deployment.md`](https://github.com/blih-tech/blihops-design/blob/main/03-Engineering/Deployment.md).
+
+## Related repositories
+
+- [`blihops-web`](https://github.com/blih-tech/blihops-web): public marketing
+  website consuming the managed content API.
+- [`blihops-admin`](https://github.com/blih-tech/blihops-admin): internal
+  operations + content administration frontend.
+- [`blihops-design`](https://github.com/blih-tech/blihops-design): product,
+  UX, and engineering design docs.
 
 ## Contributing
 
