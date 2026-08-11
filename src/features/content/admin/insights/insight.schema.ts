@@ -21,6 +21,10 @@ export { getInsightDetailResponseSchema, getInsightsResponseSchema };
 
 export const adminInsightListItemSchema = insightListItemSchema.extend({
   status: z.enum(['DRAFT', 'PUBLISHED']),
+  bodyComplete: z.object({
+    en: z.boolean(),
+    de: z.boolean(),
+  }),
 });
 
 export const getAdminInsightsResponseSchema = z.object({
@@ -114,7 +118,7 @@ export const createInsightResponseSchema = z.object({
 const sharedFieldsPatchSchema = z.strictObject({
   author: authorSchema.optional(),
   categoryId: idParamSchema.nullable().optional(),
-  media: mediaSchema.optional(),
+  media: mediaSchema.nullable().optional(),
   tags: z.array(idParamSchema).optional(),
   readTimeMinutes: readTimeMinutesSchema.optional(),
 });

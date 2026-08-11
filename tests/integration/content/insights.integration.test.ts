@@ -38,6 +38,7 @@ type ListItem = {
   titles: { en: string; de: string };
   author: string;
   status?: 'DRAFT' | 'PUBLISHED';
+  bodyComplete?: { en: boolean; de: boolean };
   createdAt: string;
 };
 
@@ -46,6 +47,7 @@ type DetailBody = {
     id: string;
     author: string;
     readTimeMinutes: number;
+    media: { type: 'image' | 'video'; url: string; alt?: string };
     status: 'DRAFT' | 'PUBLISHED';
     content: {
       en?: { title: string; slug: string; excerpt: string; body: unknown[] };
@@ -99,6 +101,7 @@ describe('insights resource', () => {
       status?: 'DRAFT' | 'PUBLISHED';
       categoryId?: string | null;
       readTimeMinutes?: number;
+      media?: unknown;
       content?: unknown;
     } = {},
   ) => {
@@ -109,7 +112,7 @@ describe('insights resource', () => {
         author: 'Blih Ops Editorial',
         categoryId: overrides.categoryId ?? category.id,
         readTimeMinutes: overrides.readTimeMinutes ?? 0,
-        media: completeMedia,
+        media: overrides.media ?? completeMedia,
         status: overrides.status ?? 'DRAFT',
         content: overrides.content ?? completeContent(slug),
       },
@@ -411,6 +414,67 @@ describe('insights resource', () => {
       expect(asDetail(res.body).data.tags).toEqual([
         { id: newTag.id, name: 'Reporting' },
       ]);
+    });
+
+    it('clears all tags with an empty array', async () => {
+      const oldTag = await seedTag();
+      const insight = await createInsight({ slug: 'my-slug' });
+      await prisma.insightTag.create({
+        data: { insightId: insight.id, tagId: oldTag.id },
+      });
+
+      const res = await request(app)
+        .patch(`/api/v1/content/admin/insights/${insight.id}`)
+        .set('cookie', adminCookie)
+        .send({ tags: [] })
+        .expect(200);
+
+      expect(asDetail(res.body).data.tags).toEqual([]);
+    });
+
+    it('clears the media with a null value', async () => {
+      const insight = await createInsight({
+        slug: 'my-slug',
+        media: { type: 'image', url: 'https://example.com/cover.jpg' },
+      });
+
+      const res = await request(app)
+        .patch(`/api/v1/content/admin/insights/${insight.id}`)
+        .set('cookie', adminCookie)
+        .send({ media: null })
+        .expect(200);
+
+      expect(asDetail(res.body).data.media).toEqual({
+        type: 'image',
+        url: '',
+      });
+    });
+
+    it('returns bodyComplete flags in the admin list', async () => {
+      await createInsight({ slug: 'complete-slug' });
+      await createInsight({
+        slug: 'incomplete-slug',
+        content: {
+          en: { title: 'Only a title', slug: 'incomplete-slug' },
+          de: { title: 'Nur ein Titel', slug: 'incomplete-slug' },
+        },
+      });
+
+      const res = await request(app)
+        .get('/api/v1/content/admin/insights')
+        .set('cookie', adminCookie)
+        .expect(200);
+
+      const items = asList(res.body).items;
+      const complete = items.find(
+        (item) => item.slugs.en === 'complete-slug-en',
+      );
+      const incomplete = items.find(
+        (item) => item.slugs.en === 'incomplete-slug',
+      );
+
+      expect(complete?.bodyComplete).toEqual({ en: true, de: true });
+      expect(incomplete?.bodyComplete).toEqual({ en: false, de: false });
     });
 
     it('returns 404 when a tag id does not exist', async () => {

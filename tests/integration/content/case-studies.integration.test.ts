@@ -40,6 +40,7 @@ type ListItem = {
   titles: { en: string; de: string };
   client: string;
   status?: 'DRAFT' | 'PUBLISHED';
+  bodyComplete?: { en: boolean; de: boolean };
   createdAt: string;
 };
 
@@ -47,6 +48,7 @@ type DetailBody = {
   data: {
     id: string;
     client: string;
+    media: { type: 'image' | 'video'; url: string; alt?: string };
     status: 'DRAFT' | 'PUBLISHED';
     content: {
       en?: { title: string; slug: string; summary: string };
@@ -98,6 +100,7 @@ describe('case studies resource', () => {
       slug?: string;
       status?: 'DRAFT' | 'PUBLISHED';
       categoryId?: string | null;
+      media?: unknown;
       content?: unknown;
     } = {},
   ) => {
@@ -107,7 +110,7 @@ describe('case studies resource', () => {
       data: {
         client: 'Acme',
         categoryId: overrides.categoryId ?? category.id,
-        media: completeMedia,
+        media: overrides.media ?? completeMedia,
         status: overrides.status ?? 'DRAFT',
         content: overrides.content ?? completeContent(slug),
       },
@@ -413,6 +416,67 @@ describe('case studies resource', () => {
       expect(asDetail(res.body).data.tags).toEqual([
         { id: newTag.id, name: 'Logistics' },
       ]);
+    });
+
+    it('clears all tags with an empty array', async () => {
+      const oldTag = await seedTag();
+      const caseStudy = await createCaseStudy({ slug: 'my-slug' });
+      await prisma.caseStudyTag.create({
+        data: { caseStudyId: caseStudy.id, tagId: oldTag.id },
+      });
+
+      const res = await request(app)
+        .patch(`/api/v1/content/admin/case-studies/${caseStudy.id}`)
+        .set('cookie', adminCookie)
+        .send({ tags: [] })
+        .expect(200);
+
+      expect(asDetail(res.body).data.tags).toEqual([]);
+    });
+
+    it('clears the media with a null value', async () => {
+      const caseStudy = await createCaseStudy({
+        slug: 'my-slug',
+        media: { type: 'image', url: 'https://example.com/cover.jpg' },
+      });
+
+      const res = await request(app)
+        .patch(`/api/v1/content/admin/case-studies/${caseStudy.id}`)
+        .set('cookie', adminCookie)
+        .send({ media: null })
+        .expect(200);
+
+      expect(asDetail(res.body).data.media).toEqual({
+        type: 'image',
+        url: '',
+      });
+    });
+
+    it('returns bodyComplete flags in the admin list', async () => {
+      await createCaseStudy({ slug: 'complete-slug' });
+      await createCaseStudy({
+        slug: 'incomplete-slug',
+        content: {
+          en: { title: 'Only a title', slug: 'incomplete-slug' },
+          de: { title: 'Nur ein Titel', slug: 'incomplete-slug' },
+        },
+      });
+
+      const res = await request(app)
+        .get('/api/v1/content/admin/case-studies')
+        .set('cookie', adminCookie)
+        .expect(200);
+
+      const items = asList(res.body).items;
+      const complete = items.find(
+        (item) => item.slugs.en === 'complete-slug-en',
+      );
+      const incomplete = items.find(
+        (item) => item.slugs.en === 'incomplete-slug',
+      );
+
+      expect(complete?.bodyComplete).toEqual({ en: true, de: true });
+      expect(incomplete?.bodyComplete).toEqual({ en: false, de: false });
     });
 
     it('returns 404 when a tag id does not exist', async () => {

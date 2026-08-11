@@ -100,7 +100,7 @@ registry.registerPath({
   method: 'get',
   path: '/api/v1/content/admin/case-studies',
   description:
-    'Admin-only. Lists all case studies with optional status and category filters.',
+    'Admin-only. Lists all case studies with optional status and category filters. Each item includes bodyComplete flags per locale, indicating whether every publish-required field (title, slug, summary, and all body sections) is present.',
   tags: ['Content'],
   security: cookieSecurity,
   request: {
@@ -173,7 +173,7 @@ registry.registerPath({
   method: 'patch',
   path: '/api/v1/content/admin/case-studies/{id}',
   description:
-    'Admin-only. Updates shared fields (client, categoryId, media, tags) or replaces one locale content object. Changes apply live, even to published records.',
+    'Admin-only. Updates shared fields (client, categoryId, media, tags) or replaces one locale content object. Pass media: null to remove the media and tags: [] to remove all tags. Changes apply live, even to published records.',
   tags: ['Content'],
   security: cookieSecurity,
   request: {

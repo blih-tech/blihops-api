@@ -95,7 +95,7 @@ registry.registerPath({
   method: 'get',
   path: '/api/v1/content/admin/insights',
   description:
-    'Admin-only. Lists all insights with optional status and category filters.',
+    'Admin-only. Lists all insights with optional status and category filters. Each item includes bodyComplete flags per locale, indicating whether every publish-required field (title, slug, excerpt, and at least one complete section) is present.',
   tags: ['Content'],
   security: cookieSecurity,
   request: {
@@ -166,7 +166,7 @@ registry.registerPath({
   method: 'patch',
   path: '/api/v1/content/admin/insights/{id}',
   description:
-    'Admin-only. Updates shared fields (author, categoryId, media, tags, readTimeMinutes) or replaces one locale content object. Changes apply live, even to published records.',
+    'Admin-only. Updates shared fields (author, categoryId, media, tags, readTimeMinutes) or replaces one locale content object. Pass media: null to remove the media and tags: [] to remove all tags. Changes apply live, even to published records.',
   tags: ['Content'],
   security: cookieSecurity,
   request: {

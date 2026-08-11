@@ -22,6 +22,10 @@ export { getCaseStudyDetailResponseSchema, getCaseStudiesResponseSchema };
 
 export const adminCaseStudyListItemSchema = caseStudyListItemSchema.extend({
   status: z.enum(['DRAFT', 'PUBLISHED']),
+  bodyComplete: z.object({
+    en: z.boolean(),
+    de: z.boolean(),
+  }),
 });
 
 export const getAdminCaseStudiesResponseSchema = z.object({
@@ -105,7 +109,7 @@ export const createCaseStudyResponseSchema = z.object({
 const sharedFieldsPatchSchema = z.strictObject({
   client: clientSchema.optional(),
   categoryId: idParamSchema.nullable().optional(),
-  media: mediaSchema.optional(),
+  media: mediaSchema.nullable().optional(),
   tags: z.array(idParamSchema).optional(),
 });
 
