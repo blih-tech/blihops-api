@@ -29,7 +29,8 @@
     "db:deploy": "prisma migrate deploy",
     "db:studio": "prisma studio",
     "seed:admin": "tsx src/shared/scripts/seed-admin.ts",
-    "seed:demo": "tsx src/shared/scripts/seed-demo-users.ts"
+    "seed:demo": "tsx src/shared/scripts/seed-demo-users.ts",
+    "seed:services": "tsx src/shared/scripts/seed-services.ts"
   },
   "engines": {
     "node": ">=24.18.0 <25",
