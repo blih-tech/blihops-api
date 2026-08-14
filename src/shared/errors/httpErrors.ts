@@ -100,6 +100,18 @@ export class ContentInvalidLocaleError extends AppError {
   }
 }
 
+export class LeadNotFoundError extends AppError {
+  constructor(message = 'Lead not found') {
+    super(message, { code: ErrorCodes.LEAD_NOT_FOUND, statusCode: 404 });
+  }
+}
+
+export class LeadWebhookInvalidError extends AppError {
+  constructor(message = 'Invalid webhook signature') {
+    super(message, { code: ErrorCodes.LEAD_WEBHOOK_INVALID, statusCode: 401 });
+  }
+}
+
 export class InternalServerError extends AppError {
   constructor(message = 'Internal server error') {
     super(message, {
