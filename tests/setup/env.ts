@@ -8,5 +8,6 @@ process.env.API_URL ??= 'http://localhost:4000';
 process.env.WEB_URL ??= 'http://localhost:3000';
 process.env.CORS_ORIGIN ??= 'http://localhost:3000';
 process.env.RESEND_API_KEY ??= 're_test_placeholder';
+process.env.CALCOM_WEBHOOK_SECRET ??= 'test-calcom-webhook-secret';
 process.env.EMAIL_FROM ??= 'Blih Ops <noreply@mail.blihops.com>';
 process.env.EMAIL_LOGO_URL ??= 'https://blihops.com/logo.png';

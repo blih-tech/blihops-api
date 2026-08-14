@@ -32,6 +32,7 @@ export const envSchema = z
       .trim()
       .default('Blih Ops <noreply@mail.blihops.com>'),
     EMAIL_LOGO_URL: z.string().url(),
+    CALCOM_WEBHOOK_SECRET: z.string().trim().optional(),
   })
   .superRefine((env, ctx) => {
     if (env.NODE_ENV !== 'test' && !env.RESEND_API_KEY) {
@@ -39,6 +40,14 @@ export const envSchema = z
         code: 'custom',
         path: ['RESEND_API_KEY'],
         message: 'RESEND_API_KEY is required outside of the test environment',
+      });
+    }
+    if (env.NODE_ENV !== 'test' && !env.CALCOM_WEBHOOK_SECRET) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['CALCOM_WEBHOOK_SECRET'],
+        message:
+          'CALCOM_WEBHOOK_SECRET is required outside of the test environment',
       });
     }
   });
