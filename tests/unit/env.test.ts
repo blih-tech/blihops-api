@@ -20,6 +20,7 @@ const validEnv = {
   CORS_ORIGIN: 'http://localhost:3000',
   RESEND_API_KEY: 're_test_placeholder',
   EMAIL_LOGO_URL: 'https://blihops.com/logo.png',
+  CALCOM_WEBHOOK_SECRET: 'whsec_test_placeholder',
 };
 
 describe('env validation', () => {
@@ -49,6 +50,21 @@ describe('env validation', () => {
   it('allows RESEND_API_KEY to be missing in test env', () => {
     const result = envSchema.safeParse({
       ...without(validEnv, 'RESEND_API_KEY'),
+      NODE_ENV: 'test',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('fails when CALCOM_WEBHOOK_SECRET is missing outside of test', () => {
+    const result = envSchema.safeParse(
+      without(validEnv, 'CALCOM_WEBHOOK_SECRET'),
+    );
+    expect(result.success).toBe(false);
+  });
+
+  it('allows CALCOM_WEBHOOK_SECRET to be missing in test env', () => {
+    const result = envSchema.safeParse({
+      ...without(validEnv, 'CALCOM_WEBHOOK_SECRET'),
       NODE_ENV: 'test',
     });
     expect(result.success).toBe(true);
