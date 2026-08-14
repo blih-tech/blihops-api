@@ -1,6 +1,9 @@
+import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
 import { z } from 'zod';
 
 import type { LeadStatus, LeadType } from '../../generated/prisma/client.js';
+
+extendZodWithOpenApi(z);
 
 export const leadTypeSchema = z.enum(['CONTACT', 'PILOT', 'CALL']);
 
@@ -131,6 +134,43 @@ export const leadListQuerySchema = z.object({
 
 export type ContactLeadPayload = z.infer<typeof contactLeadBodySchema>;
 export type PilotLeadPayload = z.infer<typeof pilotLeadBodySchema>;
+
+export const leadListItemSchema = z.object({
+  id: z.string(),
+  type: leadTypeSchema,
+  status: leadStatusSchema,
+  fullName: z.string(),
+  workEmail: z.string(),
+  company: z.string().nullable(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const leadDetailSchema = leadListItemSchema.extend({
+  calBookingUid: z.string().nullable(),
+  details: z.record(z.string(), z.unknown()),
+});
+
+export const leadCreatedResponseSchema = z.object({
+  data: z.object({
+    id: z.string(),
+    type: leadTypeSchema,
+    status: leadStatusSchema,
+  }),
+});
+
+export const leadListResponseSchema = z.object({
+  items: z.array(leadListItemSchema),
+  meta: z.record(z.string(), z.unknown()),
+});
+
+export const leadDetailResponseSchema = z.object({
+  data: leadDetailSchema,
+});
+
+export const webhookAckResponseSchema = z.object({
+  data: z.object({ ok: z.boolean() }),
+});
 
 export type LeadListItem = {
   id: string;

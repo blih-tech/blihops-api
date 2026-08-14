@@ -6,6 +6,7 @@ import { publicPaths, registerPublicPath } from './common.js';
 import { registry } from './registry.js';
 import './auth.paths.js';
 import '../../features/content/paths.js';
+import '../../features/leads/paths.js';
 
 const AUTH_BASE_PATH = '/api/v1/auth';
 
