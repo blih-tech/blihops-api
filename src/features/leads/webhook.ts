@@ -5,9 +5,12 @@ import { env } from '../../shared/configs/env.js';
 export type CalWebhookEvent = {
   triggerEvent: string;
   uid: string | undefined;
+  rescheduleUid: string | undefined;
   startTime: string | undefined;
+  endTime: string | undefined;
   timeZone: string | undefined;
   bookingUrl: string | undefined;
+  meetingUrl: string | undefined;
   attendeeName: string | undefined;
   attendeeEmail: string | undefined;
   company: string | undefined;
@@ -95,16 +98,43 @@ export function extractCalWebhookEvent(body: unknown): CalWebhookEvent {
       ? payload.responses
       : {}
   ) as Record<string, unknown>;
+  // Cal.com does not include a top-level timeZone on the payload; the
+  // attendee's zone is the reliable source, so fall back to it.
+  const attendeeTimeZone =
+    typeof attendee.timeZone === 'string' ? attendee.timeZone : undefined;
+  const videoCallData = (
+    typeof payload.videoCallData === 'object' && payload.videoCallData !== null
+      ? payload.videoCallData
+      : {}
+  ) as Record<string, unknown>;
+  const metadata = (
+    typeof payload.metadata === 'object' && payload.metadata !== null
+      ? payload.metadata
+      : {}
+  ) as Record<string, unknown>;
 
   return {
     triggerEvent:
       typeof record.triggerEvent === 'string' ? record.triggerEvent : 'UNKNOWN',
     uid: typeof payload.uid === 'string' ? payload.uid : undefined,
+    rescheduleUid:
+      typeof payload.rescheduleUid === 'string'
+        ? payload.rescheduleUid
+        : undefined,
     startTime:
       typeof payload.startTime === 'string' ? payload.startTime : undefined,
+    endTime: typeof payload.endTime === 'string' ? payload.endTime : undefined,
     timeZone:
-      typeof payload.timeZone === 'string' ? payload.timeZone : undefined,
+      typeof payload.timeZone === 'string'
+        ? payload.timeZone
+        : attendeeTimeZone,
     bookingUrl: typeof payload.url === 'string' ? payload.url : undefined,
+    meetingUrl:
+      typeof videoCallData.url === 'string'
+        ? videoCallData.url
+        : typeof metadata.videoCallUrl === 'string'
+          ? metadata.videoCallUrl
+          : undefined,
     attendeeName: typeof attendee.name === 'string' ? attendee.name : undefined,
     attendeeEmail:
       typeof attendee.email === 'string' ? attendee.email : undefined,
