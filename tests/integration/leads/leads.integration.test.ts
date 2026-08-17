@@ -114,8 +114,7 @@ const bookingCreatedPayload = {
   payload: {
     uid: 'cal-booking-1',
     startTime: '2026-08-20T14:00:00.000Z',
-    timeZone: 'Europe/Berlin',
-    url: 'https://cal.com/yonatane-mk-sa4cic/discovery-call/cal-booking-1',
+    endTime: '2026-08-20T14:15:00.000Z',
     attendees: [
       { name: 'Jane Doe', email: 'jane@acme.com', timeZone: 'Europe/Berlin' },
     ],
@@ -127,6 +126,14 @@ const bookingCreatedPayload = {
       },
       'How did you hear about us?': { label: 'x', value: 'LinkedIn' },
       'Team size?': { label: 'x', value: '10-50' },
+    },
+    videoCallData: {
+      type: 'video_provider',
+      id: 'meeting-room-id',
+      url: 'https://video.example.com/meeting-room-id',
+    },
+    metadata: {
+      videoCallUrl: 'https://app.example.com/video/cal-booking-1',
     },
   },
 };
@@ -286,11 +293,56 @@ describe('leads resource', () => {
       });
       expect(lead?.details).toMatchObject({
         bookingTime: '2026-08-20T14:00:00.000Z',
+        bookingEndTime: '2026-08-20T14:15:00.000Z',
         timezone: 'Europe/Berlin',
-        bookingUrl: bookingCreatedPayload.payload.url,
+        meetingUrl: 'https://video.example.com/meeting-room-id',
         challenge: 'Ticket backlog',
         hearAbout: 'LinkedIn',
         teamSize: '10-50',
+      });
+      // No booking page URL in real payloads — only the meeting link.
+      expect(lead?.details).not.toHaveProperty('bookingUrl');
+    });
+
+    it('falls back to attendee timezone and metadata.videoCallUrl', async () => {
+      await postWebhook({
+        triggerEvent: 'BOOKING_CREATED',
+        payload: {
+          uid: 'cal-booking-meta',
+          startTime: '2026-08-20T14:00:00.000Z',
+          attendees: [
+            { name: 'Jane Doe', email: 'jane@acme.com', timeZone: 'UTC' },
+          ],
+          metadata: {
+            videoCallUrl: 'https://app.example.com/video/cal-booking-meta',
+          },
+        },
+      }).expect(200);
+
+      const lead = await prisma.lead.findFirst({ where: { type: 'CALL' } });
+      expect(lead?.details).toMatchObject({
+        timezone: 'UTC',
+        meetingUrl: 'https://app.example.com/video/cal-booking-meta',
+      });
+    });
+
+    it('keeps extracting top-level url and timeZone from legacy payloads', async () => {
+      await postWebhook({
+        triggerEvent: 'BOOKING_CREATED',
+        payload: {
+          uid: 'cal-booking-legacy',
+          startTime: '2026-08-20T14:00:00.000Z',
+          timeZone: 'Europe/Berlin',
+          url: 'https://cal.com/yonatane-mk-sa4cic/discovery-call/cal-booking-legacy',
+          attendees: [{ name: 'Jane Doe', email: 'jane@acme.com' }],
+        },
+      }).expect(200);
+
+      const lead = await prisma.lead.findFirst({ where: { type: 'CALL' } });
+      expect(lead?.details).toMatchObject({
+        timezone: 'Europe/Berlin',
+        bookingUrl:
+          'https://cal.com/yonatane-mk-sa4cic/discovery-call/cal-booking-legacy',
       });
     });
 
@@ -343,7 +395,83 @@ describe('leads resource', () => {
       await expect(prisma.lead.count()).resolves.toBe(0);
     });
 
-    it('updates booking time and url on BOOKING_RESCHEDULED without touching status', async () => {
+    it('handles real reschedules: matches by rescheduleUid, updates links, re-points the booking uid', async () => {
+      await postWebhook(bookingCreatedPayload).expect(200);
+
+      await postWebhook({
+        triggerEvent: 'BOOKING_RESCHEDULED',
+        payload: {
+          uid: 'cal-booking-2', // the NEW booking uid
+          rescheduleUid: 'cal-booking-1', // the uid the lead was created with
+          startTime: '2026-08-21T09:00:00.000Z',
+          endTime: '2026-08-21T09:15:00.000Z',
+          attendees: [
+            {
+              name: 'Jane Doe',
+              email: 'jane@acme.com',
+              timeZone: 'Europe/Berlin',
+            },
+          ],
+          videoCallData: {
+            type: 'video_provider',
+            id: 'meeting-room-id-2',
+            url: 'https://video.example.com/meeting-room-id-2',
+          },
+          metadata: {
+            videoCallUrl: 'https://app.example.com/video/cal-booking-2',
+          },
+        },
+      }).expect(200);
+
+      const lead = await prisma.lead.findFirst({ where: { type: 'CALL' } });
+      expect(lead?.status).toBe('NEW');
+      expect(lead?.calBookingUid).toBe('cal-booking-2');
+      expect(lead?.details).toMatchObject({
+        bookingTime: '2026-08-21T09:00:00.000Z',
+        bookingEndTime: '2026-08-21T09:15:00.000Z',
+        meetingUrl: 'https://video.example.com/meeting-room-id-2',
+      });
+    });
+
+    it('closes a rescheduled booking when the new booking uid is cancelled', async () => {
+      await postWebhook(bookingCreatedPayload).expect(200);
+      await postWebhook({
+        triggerEvent: 'BOOKING_RESCHEDULED',
+        payload: {
+          uid: 'cal-booking-2',
+          rescheduleUid: 'cal-booking-1',
+          startTime: '2026-08-21T09:00:00.000Z',
+        },
+      }).expect(200);
+
+      await postWebhook({
+        triggerEvent: 'BOOKING_CANCELLED',
+        payload: { uid: 'cal-booking-2' },
+      }).expect(200);
+
+      const lead = await prisma.lead.findFirst({ where: { type: 'CALL' } });
+      expect(lead?.status).toBe('CLOSED');
+    });
+
+    it('is idempotent: a duplicate reschedule delivery acks without error or duplication', async () => {
+      await postWebhook(bookingCreatedPayload).expect(200);
+      const reschedule = {
+        triggerEvent: 'BOOKING_RESCHEDULED',
+        payload: {
+          uid: 'cal-booking-2',
+          rescheduleUid: 'cal-booking-1',
+          startTime: '2026-08-21T09:00:00.000Z',
+        },
+      };
+
+      await postWebhook(reschedule).expect(200);
+      // Second delivery: no lead matches the old uid anymore — ack, no-op.
+      await postWebhook(reschedule).expect(200);
+
+      await expect(prisma.lead.count()).resolves.toBe(1);
+    });
+
+    it('updates booking time and url on legacy reschedules (same uid, top-level url) without touching status', async () => {
       await postWebhook(bookingCreatedPayload).expect(200);
 
       await postWebhook({
