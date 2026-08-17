@@ -39,8 +39,9 @@ type SeedCallLead = {
   calBookingUid: string;
   details: {
     bookingTime: string;
+    bookingEndTime?: string;
     timezone: string;
-    bookingUrl: string;
+    meetingUrl?: string;
     cancelledAt?: string;
   };
   daysAgo: number;
@@ -173,8 +174,11 @@ const seedCallLeads: SeedCallLead[] = [
     calBookingUid: 'seed-call-0001',
     details: {
       bookingTime: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
+      bookingEndTime: new Date(
+        Date.now() + 3 * 24 * 60 * 60 * 1000 + 30 * 60 * 1000,
+      ).toISOString(),
       timezone: 'Europe/Berlin',
-      bookingUrl: 'https://cal.com/blih-ops-desicovery-call/seed-call-0001',
+      meetingUrl: 'https://meet.example.com/seed-call-0001',
     },
     daysAgo: 0,
   },
@@ -185,8 +189,11 @@ const seedCallLeads: SeedCallLead[] = [
     calBookingUid: 'seed-call-0002',
     details: {
       bookingTime: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+      bookingEndTime: new Date(
+        Date.now() + 5 * 24 * 60 * 60 * 1000 + 30 * 60 * 1000,
+      ).toISOString(),
       timezone: 'America/New_York',
-      bookingUrl: 'https://cal.com/blih-ops-desicovery-call/seed-call-0002',
+      meetingUrl: 'https://meet.example.com/seed-call-0002',
     },
     daysAgo: 3,
   },
@@ -197,8 +204,11 @@ const seedCallLeads: SeedCallLead[] = [
     calBookingUid: 'seed-call-0003',
     details: {
       bookingTime: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
+      bookingEndTime: new Date(
+        Date.now() - 4 * 24 * 60 * 60 * 1000 + 30 * 60 * 1000,
+      ).toISOString(),
       timezone: 'Asia/Dubai',
-      bookingUrl: 'https://cal.com/blih-ops-desicovery-call/seed-call-0003',
+      meetingUrl: 'https://meet.example.com/seed-call-0003',
     },
     daysAgo: 6,
   },
@@ -209,8 +219,11 @@ const seedCallLeads: SeedCallLead[] = [
     calBookingUid: 'seed-call-0004',
     details: {
       bookingTime: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
+      bookingEndTime: new Date(
+        Date.now() + 2 * 24 * 60 * 60 * 1000 + 30 * 60 * 1000,
+      ).toISOString(),
       timezone: 'Europe/Berlin',
-      bookingUrl: 'https://cal.com/blih-ops-desicovery-call/seed-call-0004',
+      meetingUrl: 'https://meet.example.com/seed-call-0004',
       cancelledAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
     },
     daysAgo: 5,
