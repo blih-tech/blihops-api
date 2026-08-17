@@ -70,6 +70,7 @@ export function updateLeadRecord(
   data: {
     status?: LeadStatus;
     details?: Prisma.InputJsonValue;
+    calBookingUid?: string;
   },
 ) {
   return prisma.lead.update({ where: { id }, data });
