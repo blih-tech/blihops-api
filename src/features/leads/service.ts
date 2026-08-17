@@ -107,8 +107,10 @@ export async function handleCalWebhook(event: CalWebhookEvent): Promise<void> {
       }
       const details: Record<string, unknown> = {};
       if (event.startTime !== undefined) details.bookingTime = event.startTime;
+      if (event.endTime !== undefined) details.bookingEndTime = event.endTime;
       if (event.timeZone !== undefined) details.timezone = event.timeZone;
       if (event.bookingUrl !== undefined) details.bookingUrl = event.bookingUrl;
+      if (event.meetingUrl !== undefined) details.meetingUrl = event.meetingUrl;
       if (event.challenge !== undefined) details.challenge = event.challenge;
       if (event.hearAbout !== undefined) details.hearAbout = event.hearAbout;
       if (event.teamSize !== undefined) details.teamSize = event.teamSize;
@@ -165,17 +167,22 @@ export async function handleCalWebhook(event: CalWebhookEvent): Promise<void> {
       break;
     }
     case 'BOOKING_RESCHEDULED': {
-      if (event.uid === undefined) {
+      // Cal.com sends the NEW booking's uid in payload.uid and the previous
+      // booking's uid in payload.rescheduleUid. The lead is stored under the
+      // uid it was created with, so match by rescheduleUid when present
+      // (fall back to uid for payloads that carry only one uid).
+      const matchUid = event.rescheduleUid ?? event.uid;
+      if (matchUid === undefined) {
         logger.warn(
           { triggerEvent: event.triggerEvent },
           'booking event without uid, ignored',
         );
         return;
       }
-      const existing = await findByCalBookingUid(event.uid);
+      const existing = await findByCalBookingUid(matchUid);
       if (existing === null) {
         logger.warn(
-          { uid: event.uid },
+          { uid: matchUid },
           'rescheduled booking has no matching lead, ignored',
         );
         return;
@@ -185,11 +192,24 @@ export async function handleCalWebhook(event: CalWebhookEvent): Promise<void> {
         ...(event.startTime !== undefined
           ? { bookingTime: event.startTime }
           : {}),
+        ...(event.endTime !== undefined
+          ? { bookingEndTime: event.endTime }
+          : {}),
         ...(event.bookingUrl !== undefined
           ? { bookingUrl: event.bookingUrl }
           : {}),
+        ...(event.meetingUrl !== undefined
+          ? { meetingUrl: event.meetingUrl }
+          : {}),
       };
-      await updateLeadRecord(existing.id, { details });
+      await updateLeadRecord(existing.id, {
+        details,
+        // Re-point the dedupe key at the new booking uid so later events
+        // (cancellation, another reschedule) for the new booking still match.
+        ...(event.rescheduleUid !== undefined && event.uid !== undefined
+          ? { calBookingUid: event.uid }
+          : {}),
+      });
       break;
     }
     default:
