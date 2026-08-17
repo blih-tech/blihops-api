@@ -23,7 +23,6 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # Environment files
-.env*
 !.env.example
 
 # editor
@@ -32,3 +31,4 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 src/generated/
+config.bat

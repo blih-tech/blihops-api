@@ -86,7 +86,7 @@ registry.registerPath({
   method: 'post',
   path: '/api/v1/leads/webhooks/calcom',
   description:
-    'Public (signature-verified). Cal.com webhook receiver. Handles BOOKING_CREATED (creates a CALL lead, idempotent by booking UID), BOOKING_CANCELLED (closes the matched lead unless CONVERTED) and BOOKING_RESCHEDULED (updates booking time/URL). Unknown events are acknowledged with 200.',
+    'Public (signature-verified). Cal.com webhook receiver. Handles BOOKING_CREATED (creates a CALL lead with booking time, meeting URL and popup answers, idempotent by booking UID), BOOKING_CANCELLED (closes the matched lead unless CONVERTED) and BOOKING_RESCHEDULED (matches via rescheduleUid, updates booking time/meeting URL and re-points the booking UID). Unknown events are acknowledged with 200.',
   tags: ['Leads'],
   responses: {
     200: {
