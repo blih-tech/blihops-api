@@ -1,5 +1,3 @@
-
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -10,16 +8,17 @@ datasource db {
 }
 
 model User {
-  id            String    @id
+  id            String         @id
   name          String
-  email         String    @unique
-  emailVerified Boolean   @default(false)
+  email         String         @unique
+  emailVerified Boolean        @default(false)
   image         String?
   role          String
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   sessions      Session[]
   accounts      Account[]
+  talentAccount TalentAccount?
 }
 
 model Session {
@@ -66,10 +65,10 @@ enum ContentStatus {
 }
 
 model Tag {
-  id          String        @id @default(cuid())
-  name        String        @unique
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  id          String         @id @default(cuid())
+  name        String         @unique
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
   caseStudies CaseStudyTag[]
   insights    InsightTag[]
 }
@@ -131,15 +130,15 @@ model ServicesHeroMedia {
 }
 
 model CaseStudy {
-  id         String        @id @default(cuid())
+  id         String         @id @default(cuid())
   client     String
   categoryId String?
-  category   Category?     @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  category   Category?      @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   media      Json
-  status     ContentStatus @default(DRAFT)
+  status     ContentStatus  @default(DRAFT)
   content    Json
-  createdAt  DateTime      @default(now())
-  updatedAt  DateTime      @updatedAt
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
   tags       CaseStudyTag[]
 }
 
@@ -207,17 +206,177 @@ enum LeadStatus {
 }
 
 model Lead {
-  id             String     @id @default(cuid())
-  type           LeadType
-  status         LeadStatus @default(NEW)
-  fullName       String
-  workEmail      String
-  company        String?
-  calBookingUid  String?    @unique
-  details        Json       @default("{}")
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
+  id            String     @id @default(cuid())
+  type          LeadType
+  status        LeadStatus @default(NEW)
+  fullName      String
+  workEmail     String
+  company       String?
+  calBookingUid String?    @unique
+  details       Json       @default("{}")
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 
   @@index([type, status])
   @@index([createdAt])
+}
+
+enum TalentApplicationStatus {
+  NEW
+  UNDER_REVIEW
+  SCREENING
+  TECHNICAL_ASSESSMENT
+  ENGLISH_ASSESSMENT
+  REMOTE_READINESS_ASSESSMENT
+  APPROVED
+  COMPLETION_REQUESTED
+  COMPLETION_SUBMITTED
+  PROFILE_CREATED
+  REJECTED
+  ARCHIVED
+}
+
+enum ProfileCompletionRequestStatus {
+  PENDING
+  SUBMITTED
+  EXPIRED
+  REPLACED
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  REPLACED
+}
+
+enum TalentAccountStatus {
+  PENDING_INVITATION
+  ACTIVE
+  DEACTIVATED
+}
+
+enum TalentProfileVisibility {
+  HIDDEN
+  VISIBLE
+}
+
+model TalentApplication {
+  id                             String                     @id @default(cuid())
+  status                         TalentApplicationStatus    @default(NEW)
+  fullName                       String
+  workEmail                      String
+  phone                          String
+  country                        String
+  city                           String
+  primaryRole                    String
+  techStack                      String[]
+  secondarySkills                String[]
+  yearsExperience                Int
+  portfolioUrl                   String?
+  githubUrl                      String?
+  linkedinUrl                    String?
+  resumeFileKey                  String
+  completionPhotoKey             String?
+  completionShortBio             String?
+  completionProfessionalHeadline String?
+  completionSubmittedAt          DateTime?
+  internalNotes                  String                     @default("")
+  createdAt                      DateTime                   @default(now())
+  updatedAt                      DateTime                   @updatedAt
+  completionRequests             ProfileCompletionRequest[]
+  talentProfile                  TalentProfile?
+
+  @@index([status])
+  @@index([workEmail])
+  @@index([createdAt])
+}
+
+model ProfileCompletionRequest {
+  id            String                         @id @default(cuid())
+  applicationId String
+  status        ProfileCompletionRequestStatus @default(PENDING)
+  tokenHash     String?
+  sentAt        DateTime                       @default(now())
+  expiresAt     DateTime
+  submittedAt   DateTime?
+  replacedAt    DateTime?
+  createdAt     DateTime                       @default(now())
+  updatedAt     DateTime                       @updatedAt
+  application   TalentApplication              @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@index([applicationId, status])
+  @@index([expiresAt])
+}
+
+model TalentProfile {
+  id                   String                  @id @default(cuid())
+  applicationId        String                  @unique
+  fullName             String
+  workEmail            String
+  phone                String
+  country              String
+  city                 String
+  profilePhotoKey      String
+  professionalHeadline String
+  shortBio             String
+  primaryRole          String
+  techStack            String[]
+  secondarySkills      String[]
+  yearsExperience      Int
+  portfolioUrl         String?
+  githubUrl            String?
+  linkedinUrl          String?
+  resumeFileKey        String
+  seniority            String
+  englishLevel         String
+  clientMonthlyRateEur Decimal                 @db.Decimal(12, 2)
+  assessmentSummary    String
+  internalNotes        String
+  isVerified           Boolean                 @default(true)
+  visibility           TalentProfileVisibility @default(HIDDEN)
+  createdAt            DateTime                @default(now())
+  updatedAt            DateTime                @updatedAt
+  application          TalentApplication       @relation(fields: [applicationId], references: [id], onDelete: Restrict)
+  talentAccount        TalentAccount?
+
+  @@index([visibility])
+  @@index([primaryRole])
+  @@index([seniority])
+  @@index([englishLevel])
+  @@index([createdAt])
+}
+
+model TalentAccount {
+  id              String              @id @default(cuid())
+  userId          String              @unique
+  talentProfileId String              @unique
+  status          TalentAccountStatus @default(PENDING_INVITATION)
+  invitedAt       DateTime?
+  activatedAt     DateTime?
+  deactivatedAt   DateTime?
+  lastLoginAt     DateTime?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  user            User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  talentProfile   TalentProfile       @relation(fields: [talentProfileId], references: [id], onDelete: Restrict)
+  invitations     TalentInvitation[]
+
+  @@index([status])
+}
+
+model TalentInvitation {
+  id              String           @id @default(cuid())
+  talentAccountId String
+  status          InvitationStatus @default(PENDING)
+  sentAt          DateTime         @default(now())
+  expiresAt       DateTime
+  acceptedAt      DateTime?
+  replacedAt      DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  talentAccount   TalentAccount    @relation(fields: [talentAccountId], references: [id], onDelete: Cascade)
+
+  @@index([talentAccountId, status])
+  @@index([expiresAt])
 }
