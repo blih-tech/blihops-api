@@ -4,6 +4,7 @@ import { auth } from './shared/auth/auth.js';
 import { authRouter } from './features/auth/index.js';
 import { contentRouter } from './features/content/index.js';
 import { leadsRouter } from './features/leads/index.js';
+import { talentRouter } from './features/talent/talent.router.js';
 import { corsMiddleware } from './shared/middlewares/cors.js';
 import { openapiRouter } from './shared/middlewares/openapi.js';
 import { requestLogger } from './shared/middlewares/requestLogger.js';
@@ -44,6 +45,8 @@ app.use(
 app.use('/api/v1/content', contentRouter);
 
 app.use('/api/v1/leads', leadsRouter);
+
+app.use('/api/v1', talentRouter);
 
 app.get('/health', (_req, res) => {
   sendSuccess(res, { status: 'ok' });
