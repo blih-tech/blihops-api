@@ -165,3 +165,27 @@ registry.registerPath({
     422: errorResponse('Validation failed'),
   },
 });
+
+registry.registerPath({
+  method: 'post',
+  path: '/api/v1/admin/talent-applications/{id}/completion-request',
+  description:
+    'Admin-only. Sends or replaces a 7-day single-use completion request (photo + bio + headline). Requires Application APPROVED or COMPLETION_REQUESTED. Part of the applications sub-module even though it creates a ProfileCompletionRequest.',
+  tags: ['Talent'],
+  security: adminSecurity,
+  request: { params: talentApplicationIdParamsSchema },
+  responses: {
+    201: {
+      description: 'Completion request sent',
+      content: {
+        'application/json': {
+          schema: talentApplicationDetailResponseSchema,
+        },
+      },
+    },
+    401: errorResponse('Authentication required'),
+    403: errorResponse('Insufficient permissions'),
+    404: errorResponse('Talent application not found'),
+    422: errorResponse('Validation failed'),
+  },
+});

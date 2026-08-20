@@ -21,6 +21,7 @@ import {
   updateTalentApplicationNotes,
   updateTalentApplicationStatus,
 } from './application.service.js';
+import { sendCompletionRequest } from '../completion/completion.service.js';
 
 export async function createTalentApplicationController(
   req: BodyOf<typeof createTalentApplicationBodySchema>,
@@ -84,4 +85,12 @@ export async function patchTalentApplicationNotesController(
     req.body.internalNotes,
   );
   sendSuccess(res, data);
+}
+
+export async function sendCompletionRequestController(
+  req: ParamsOf<typeof talentApplicationIdParamsSchema>,
+  res: Response,
+) {
+  const result = await sendCompletionRequest(req.params.id);
+  sendSuccess(res, result, 201);
 }

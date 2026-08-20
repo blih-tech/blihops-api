@@ -8,6 +8,7 @@ import {
   listTalentApplicationsController,
   patchTalentApplicationNotesController,
   patchTalentApplicationStatusController,
+  sendCompletionRequestController,
 } from './application.controller.js';
 import {
   createTalentApplicationBodySchema,
@@ -53,4 +54,10 @@ adminTalentApplicationsRouter.patch(
   validate('params', talentApplicationIdParamsSchema),
   validate('body', patchTalentApplicationNotesBodySchema),
   patchTalentApplicationNotesController,
+);
+
+adminTalentApplicationsRouter.post(
+  '/:id/completion-request',
+  validate('params', talentApplicationIdParamsSchema),
+  sendCompletionRequestController,
 );
